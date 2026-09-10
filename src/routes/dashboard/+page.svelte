@@ -27,7 +27,7 @@
 	<div class="card">
 		<h3>Recent trips</h3>
 		{#if data.recentTrips.length === 0}
-			<div class="empty">Innum trips create pannala. <a href="/dashboard/clients">Client add pannunga</a> first.</div>
+			<div class="empty">No trips created yet. <a href="/dashboard/clients">Add a client</a> first.</div>
 		{:else}
 			<table>
 				<thead>

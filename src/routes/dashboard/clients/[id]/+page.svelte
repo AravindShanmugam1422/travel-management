@@ -46,7 +46,7 @@
 		{/if}
 
 		{#if data.passengers.length === 0}
-			<div class="empty">Passengers illa innum.</div>
+			<div class="empty">No passengers added yet</div>
 		{:else}
 			<table>
 				<thead><tr><th>Name</th><th>DOB</th></tr></thead>
@@ -88,7 +88,7 @@
 		{/if}
 
 		{#if data.trips.length === 0}
-			<div class="empty">Trips illa innum.</div>
+			<div class="empty">Trips Not Yet.</div>
 		{:else}
 			<table>
 				<thead><tr><th>Trip</th><th>Dates</th><th>Status</th></tr></thead>

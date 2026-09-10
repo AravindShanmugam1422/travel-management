@@ -14,7 +14,7 @@ export const actions = {
 		const contactEmail = form.get('contact_email')?.toString().trim() || null;
 		const contactPhone = form.get('contact_phone')?.toString().trim() || null;
 
-		if (!name) return fail(400, { error: 'Supplier name venum.' });
+		if (!name) return fail(400, { error: 'Supplier name is required.' });
 
 		await pool.query(
 			'INSERT INTO suppliers (name, url, contact_email, contact_phone) VALUES (?, ?, ?, ?)',

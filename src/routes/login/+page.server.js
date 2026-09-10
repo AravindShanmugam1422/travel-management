@@ -10,18 +10,18 @@ export const actions = {
 		const password = form.get('password')?.toString();
 
 		if (!email || !password) {
-			return fail(400, { error: 'Email and password fill pannunga.' });
+			return fail(400, { error: 'Please enter email and password.' });
 		}
 
 		const [rows] = await pool.query('SELECT * FROM agents WHERE email = ?', [email]);
 		const agent = rows[0];
 		if (!agent) {
-			return fail(400, { error: 'Account illa indha email ku. Sign up pannunga.' });
+			return fail(400, { error: 'No account found with this email.' });
 		}
 
 		const valid = await bcrypt.compare(password, agent.password_hash);
 		if (!valid) {
-			return fail(400, { error: 'Password thappu.' });
+			return fail(400, { error: 'Invalid password.' });
 		}
 
 		await createSession(agent.id, cookies);
