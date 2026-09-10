@@ -1,0 +1,298 @@
+:root {
+	--paper: #f5f1e6;
+	--surface: #ffffff;
+	--ink: #1e2a38;
+	--ink-soft: #4a5a6a;
+	--muted: #8a8272;
+	--border: #dcd4c0;
+	--teal: #1f6f6f;
+	--teal-dark: #164f4f;
+	--brass: #b8862b;
+	--danger: #a3362b;
+	--font-display: 'Spectral', Georgia, serif;
+	--font-body: 'Inter', system-ui, sans-serif;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: var(--paper);
+	color: var(--ink);
+	font-family: var(--font-body);
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	margin: 0 0 0.4em;
+	color: var(--ink);
+}
+
+h1 {
+	font-size: 1.9rem;
+}
+h2 {
+	font-size: 1.4rem;
+}
+h3 {
+	font-size: 1.1rem;
+}
+
+a {
+	color: var(--teal);
+}
+
+p {
+	max-width: 65ch;
+}
+
+.page {
+	padding: 2rem 2.5rem;
+	max-width: 1100px;
+}
+
+.card {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	padding: 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	margin-bottom: 0.9rem;
+}
+
+.field label {
+	font-size: 0.82rem;
+	color: var(--ink-soft);
+	font-weight: 500;
+}
+
+.field-row {
+	display: flex;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+.field-row .field {
+	flex: 1;
+	min-width: 160px;
+}
+
+input,
+select,
+textarea {
+	font-family: var(--font-body);
+	font-size: 0.95rem;
+	padding: 0.55rem 0.7rem;
+	border: 1px solid var(--border);
+	border-radius: 3px;
+	background: var(--paper);
+	color: var(--ink);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 2px solid var(--teal);
+	outline-offset: 1px;
+}
+
+.btn {
+	display: inline-block;
+	font-family: var(--font-body);
+	font-size: 0.9rem;
+	font-weight: 600;
+	padding: 0.6rem 1.1rem;
+	border-radius: 3px;
+	border: 1px solid transparent;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+.btn-primary {
+	background: var(--teal);
+	color: #fff;
+}
+.btn-primary:hover {
+	background: var(--teal-dark);
+}
+
+.btn-secondary {
+	background: transparent;
+	border-color: var(--border);
+	color: var(--ink);
+}
+.btn-secondary:hover {
+	border-color: var(--ink-soft);
+}
+
+.btn-danger {
+	background: transparent;
+	border-color: var(--danger);
+	color: var(--danger);
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.9rem;
+}
+
+th,
+td {
+	text-align: left;
+	padding: 0.6rem 0.5rem;
+	border-bottom: 1px solid var(--border);
+}
+
+th {
+	color: var(--ink-soft);
+	font-weight: 600;
+	font-size: 0.78rem;
+}
+
+tr:hover td {
+	background: rgba(31, 111, 111, 0.04);
+}
+
+.stamp {
+	display: inline-block;
+	padding: 0.15rem 0.6rem;
+	border: 1px solid currentColor;
+	border-radius: 20px;
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+}
+.stamp-teal {
+	color: var(--teal);
+}
+.stamp-brass {
+	color: var(--brass);
+}
+.stamp-muted {
+	color: var(--muted);
+}
+
+.error-box {
+	background: #fbeceb;
+	border: 1px solid var(--danger);
+	color: var(--danger);
+	padding: 0.7rem 1rem;
+	border-radius: 3px;
+	font-size: 0.88rem;
+	margin-bottom: 1rem;
+}
+
+.empty {
+	color: var(--muted);
+	font-style: italic;
+	padding: 1rem 0;
+}
+
+.app-shell {
+	display: flex;
+	min-height: 100vh;
+}
+
+.sidebar {
+	width: 220px;
+	flex-shrink: 0;
+	background: var(--ink);
+	color: var(--paper);
+	padding: 1.5rem 1.2rem;
+	display: flex;
+	flex-direction: column;
+}
+
+.sidebar .brand {
+	font-family: var(--font-display);
+	font-size: 1.2rem;
+	margin-bottom: 2rem;
+	color: #fff;
+}
+
+.sidebar nav {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	flex: 1;
+}
+
+.sidebar nav a {
+	color: #c9d2d8;
+	text-decoration: none;
+	padding: 0.5rem 0.6rem;
+	border-radius: 3px;
+	font-size: 0.92rem;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active {
+	background: rgba(255, 255, 255, 0.08);
+	color: #fff;
+}
+
+.sidebar .who {
+	font-size: 0.8rem;
+	color: var(--muted);
+	border-top: 1px solid rgba(255, 255, 255, 0.15);
+	padding-top: 1rem;
+	margin-top: 1rem;
+}
+
+.main {
+	flex: 1;
+	min-width: 0;
+}
+
+.auth-shell {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--paper);
+}
+
+.auth-card {
+	width: 100%;
+	max-width: 380px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	padding: 2.2rem;
+}
+
+.auth-card .brand {
+	font-family: var(--font-display);
+	font-size: 1.6rem;
+	margin-bottom: 0.2rem;
+}
+
+.auth-card .tagline {
+	color: var(--muted);
+	font-size: 0.88rem;
+	margin-bottom: 1.6rem;
+}
+
+.auth-switch {
+	margin-top: 1.2rem;
+	font-size: 0.88rem;
+	color: var(--ink-soft);
+}
