@@ -10,7 +10,7 @@ export async function load({ locals }) {
 }
 
 export const actions = {
-	default: async ({ request, locals }) => {
+	addClient: async ({ request, locals }) => {
 		const form = await request.formData();
 		const name = form.get('name')?.toString().trim();
 		const phone = form.get('phone')?.toString().trim() || null;

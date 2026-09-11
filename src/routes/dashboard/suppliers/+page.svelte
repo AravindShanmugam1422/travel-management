@@ -19,7 +19,7 @@
 
 	{#if showForm}
 		<div class="card">
-			<form method="POST" use:enhance={() => async ({ update }) => { await update(); showForm = false; }}>
+			<form method="POST" action="?/addSupplier" use:enhance={() => async ({ update }) => { await update(); showForm = false; }}>
 				<div class="field-row">
 					<div class="field">
 						<label for="name">Name</label>

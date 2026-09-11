@@ -7,7 +7,7 @@ export async function load() {
 }
 
 export const actions = {
-	default: async ({ request }) => {
+	addSupplier: async ({ request }) => {
 		const form = await request.formData();
 		const name = form.get('name')?.toString().trim();
 		const url = form.get('url')?.toString().trim() || null;

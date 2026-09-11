@@ -21,6 +21,7 @@
 		<div class="card">
 			<form
 				method="POST"
+				action="?/addClient"
 				use:enhance={() => {
 					return async ({ update }) => {
 						await update();
