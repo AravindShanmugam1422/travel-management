@@ -25,7 +25,7 @@ export const actions = {
 		const expenseDate = form.get('expense_date')?.toString() || null;
 		const tripId = form.get('trip_id')?.toString() || null;
 
-		if (!description || !amount) return fail(400, { error: 'Description and amount venum.' });
+		if (!description || !amount) return fail(400, { error: 'Description and amount are required.' });
 
 		await pool.query(
 			'INSERT INTO agent_expenses (agent_id, trip_id, description, amount, currency, expense_date) VALUES (?, ?, ?, ?, ?, ?)',

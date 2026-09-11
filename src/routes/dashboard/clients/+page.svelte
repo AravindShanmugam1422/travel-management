@@ -53,7 +53,7 @@
 
 	<div class="card">
 		{#if data.clients.length === 0}
-			<div class="empty">Innum client add pannala.</div>
+			<div class="empty">No clients added yet.</div>
 		{:else}
 			<table>
 				<thead><tr><th>Name</th><th>Phone</th><th>Email</th><th></th></tr></thead>

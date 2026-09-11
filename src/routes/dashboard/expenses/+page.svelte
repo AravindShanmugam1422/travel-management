@@ -13,7 +13,7 @@
 			{showForm ? 'Cancel' : '+ Add expense'}
 		</button>
 	</div>
-	<p style="color:var(--muted);">Trip ku vela panna nenju kai chelavu — reimbursement ku track pannunga.</p>
+	<p style="color:var(--muted);">Track out-of-pocket expenses from trip work — for reimbursement.</p>
 
 	{#if showForm}
 		<div class="card">
@@ -57,7 +57,7 @@
 
 	<div class="card">
 		{#if data.expenses.length === 0}
-			<div class="empty">Expenses illa innum.</div>
+			<div class="empty">No expenses added yet.</div>
 		{:else}
 			<table>
 				<thead><tr><th>Description</th><th>Trip</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>

@@ -44,7 +44,7 @@ export const actions = {
 		const itemTime = form.get('item_time')?.toString() || null;
 		const description = form.get('description')?.toString().trim();
 
-		if (!dayNumber || !description) return fail(400, { error: 'Day number and description venum.' });
+		if (!dayNumber || !description) return fail(400, { error: 'Day number and description are required.' });
 
 		await pool.query(
 			'INSERT INTO itinerary_items (trip_id, day_number, item_time, description) VALUES (?, ?, ?, ?)',
@@ -70,7 +70,7 @@ export const actions = {
 		const operatorConfirmation = form.get('operator_confirmation')?.toString().trim() || null;
 
 		if (!itineraryItemId || !supplierId || !amount) {
-			return fail(400, { error: 'Itinerary item, supplier, amount venum.' });
+			return fail(400, { error: 'Itinerary item, supplier, and amount are required.' });
 		}
 
 		const forexRate = await getForexRateToINR(currency);

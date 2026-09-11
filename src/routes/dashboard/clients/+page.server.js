@@ -17,7 +17,7 @@ export const actions = {
 		const email = form.get('email')?.toString().trim() || null;
 		const notes = form.get('notes')?.toString().trim() || null;
 
-		if (!name) return fail(400, { error: 'Client name venum.' });
+		if (!name) return fail(400, { error: 'Client name is required.' });
 
 		await pool.query(
 			'INSERT INTO clients (agent_id, name, phone, email, notes) VALUES (?, ?, ?, ?, ?)',

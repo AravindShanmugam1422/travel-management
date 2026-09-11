@@ -6,11 +6,11 @@
 
 <div class="page">
 	<h1>Trips</h1>
-	<p style="color:var(--muted);">New trips ah client page la irundhu create pannunga.</p>
+	<p style="color:var(--muted);">Create new trips from a client's page.</p>
 
 	<div class="card">
 		{#if data.trips.length === 0}
-			<div class="empty">Trips illa innum. <a href="/dashboard/clients">Client ku poi</a> trip create pannunga.</div>
+			<div class="empty">No trips yet. <a href="/dashboard/clients">Go to a client</a> to create one.</div>
 		{:else}
 			<table>
 				<thead><tr><th>Trip</th><th>Client</th><th>Dates</th><th>Status</th></tr></thead>

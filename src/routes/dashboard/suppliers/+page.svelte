@@ -45,7 +45,7 @@
 
 	<div class="card">
 		{#if data.suppliers.length === 0}
-			<div class="empty">Suppliers illa innum.</div>
+			<div class="empty">No suppliers added yet.</div>
 		{:else}
 			<table>
 				<thead><tr><th>Name</th><th>Website</th><th>Email</th><th>Phone</th></tr></thead>

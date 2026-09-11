@@ -33,7 +33,7 @@ export const actions = {
 		const form = await request.formData();
 		const fullName = form.get('full_name')?.toString().trim();
 		const dob = form.get('date_of_birth')?.toString() || null;
-		if (!fullName) return fail(400, { error: 'Passenger name venum.' });
+		if (!fullName) return fail(400, { error: 'Passenger name is required.' });
 
 		await pool.query('INSERT INTO passengers (client_id, full_name, date_of_birth) VALUES (?, ?, ?)', [
 			params.id,
@@ -51,7 +51,7 @@ export const actions = {
 		const tripName = form.get('trip_name')?.toString().trim();
 		const startDate = form.get('start_date')?.toString() || null;
 		const endDate = form.get('end_date')?.toString() || null;
-		if (!tripName) return fail(400, { error: 'Trip name venum.' });
+		if (!tripName) return fail(400, { error: 'Trip name is required.' });
 
 		const [result] = await pool.query(
 			'INSERT INTO trips (client_id, agent_id, trip_name, start_date, end_date) VALUES (?, ?, ?, ?, ?)',
