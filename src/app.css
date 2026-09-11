@@ -256,8 +256,16 @@ tr:hover td {
 	padding-top: 1rem;
 	margin-top: 1rem;
 }
-.sidebar .who .btn-secondary
- { color: #fff; border-color: rgba(255, 255, 255, 0.35); }
+
+.sidebar .who .btn-secondary {
+	color: #fff;
+	border-color: rgba(255, 255, 255, 0.35);
+}
+
+.sidebar .who .btn-secondary:hover {
+	border-color: #fff;
+	background: rgba(255, 255, 255, 0.08);
+}
 
 .main {
 	flex: 1;

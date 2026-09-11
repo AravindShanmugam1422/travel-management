@@ -57,7 +57,7 @@
 		{/if}
 
 		{#if data.itineraryItems.length === 0}
-			<div class="empty">No itinerary items yet.</div>
+			<div class="empty">Itinerary items illa innum.</div>
 		{:else}
 			<table>
 				<thead><tr><th>Day</th><th>Time</th><th>Description</th></tr></thead>
@@ -84,9 +84,9 @@
 
 		{#if showBookingForm}
 			{#if data.itineraryItems.length === 0}
-				<div class="empty">Add an itinerary item first before adding a booking.</div>
+				<div class="empty">Booking add panna, first oru itinerary item add pannunga.</div>
 			{:else if data.suppliers.length === 0}
-				<div class="empty">Add a <a href="/dashboard/suppliers">supplier</a> first before adding a booking.</div>
+				<div class="empty">Booking add panna, first oru <a href="/dashboard/suppliers">supplier add pannunga</a>.</div>
 			{:else}
 				<form
 					method="POST"
@@ -162,7 +162,7 @@
 		{/if}
 
 		{#if data.bookings.length === 0}
-			<div class="empty">Bookings Not yet.</div>
+			<div class="empty">Bookings illa innum.</div>
 		{:else}
 			<table>
 				<thead>

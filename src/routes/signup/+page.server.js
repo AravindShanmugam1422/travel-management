@@ -11,15 +11,15 @@ export const actions = {
 		const password = form.get('password')?.toString();
 
 		if (!name || !email || !password) {
-			return fail(400, { error: 'Please fill in all fields.' });
+			return fail(400, { error: 'Ella fields um fill pannunga.' });
 		}
 		if (password.length < 6) {
-			return fail(400, { error: 'Password must be at least 6 characters long.' });
+			return fail(400, { error: 'Password minimum 6 characters irukanum.' });
 		}
 
 		const [existing] = await pool.query('SELECT id FROM agents WHERE email = ?', [email]);
 		if (existing.length > 0) {
-			return fail(400, { error: 'This email is already registered. Please login.' });
+			return fail(400, { error: 'Indha email already registered. Login pannunga.' });
 		}
 
 		const passwordHash = await bcrypt.hash(password, 10);

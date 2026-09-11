@@ -9,3 +9,12 @@ export async function load({ locals }) {
 	);
 	return { trips };
 }
+
+export const actions = {
+	deleteTrip: async ({ request, locals }) => {
+		const form = await request.formData();
+		const id = form.get('id')?.toString();
+		await pool.query('DELETE FROM trips WHERE id = ? AND agent_id = ?', [id, locals.agent.id]);
+		return { success: true };
+	}
+};

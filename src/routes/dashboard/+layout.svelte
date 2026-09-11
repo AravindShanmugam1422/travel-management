@@ -23,7 +23,10 @@
 			Signed in as<br />
 			<strong style="color:#fff">{data.agent?.name}</strong>
 			<form method="POST" action="/logout" style="margin-top:0.6rem;">
-				<button class="btn btn-secondary" style="width:100%;font-size:0.8rem;padding:0.4rem;">Log out</button>
+				<button
+					class="btn btn-secondary"
+					style="width:100%;font-size:0.8rem;padding:0.4rem;color:#fff;border-color:rgba(255,255,255,0.4);background:transparent;"
+				>Log out</button>
 			</form>
 		</div>
 	</aside>
