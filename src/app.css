@@ -1,15 +1,15 @@
 :root {
-	--paper: #f5f1e6;
+	--paper: #f7f5ee;
 	--surface: #ffffff;
-	--ink: #1e2a38;
-	--ink-soft: #4a5a6a;
-	--muted: #8a8272;
-	--border: #dcd4c0;
-	--teal: #1f6f6f;
-	--teal-dark: #164f4f;
-	--brass: #b8862b;
+	--ink: #0b1f3a;
+	--ink-soft: #3b4a63;
+	--muted: #8892a0;
+	--border: #dde1e8;
+	--teal: #c9a227;
+	--teal-dark: #9c7d1c;
+	--brass: #7a2e3d;
 	--danger: #a3362b;
-	--font-display: 'Spectral', Georgia, serif;
+	--font-display: 'Cormorant Garamond', Georgia, serif;
 	--font-body: 'Inter', system-ui, sans-serif;
 }
 
