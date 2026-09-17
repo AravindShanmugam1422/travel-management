@@ -18,7 +18,7 @@
 
   $: greeting = currentHour < 12 ? 'Good Morning' : currentHour < 18 ? 'Good Afternoon' : 'Good Evening';
   $: roleTitle = $currentUser?.role === 'head_office' ? 'Admin' : $currentUser?.role === 'manager' ? 'Manager' : 'Agent';
-  $: greetingName = $currentUser ? `Mr ${roleTitle} ${$currentUser.name}` : '';
+  $: greetingName = $currentUser ? `${roleTitle} Mr ${$currentUser.name}` : '';
 
   $: totalRevenue = $bookings.reduce((s, b) => s + Number(b.amount || 0), 0);
 
