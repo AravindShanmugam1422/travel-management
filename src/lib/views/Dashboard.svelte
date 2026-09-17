@@ -1,9 +1,24 @@
 <script>
+  import { onMount } from 'svelte';
   import { clients, trips, bookings, destinations } from '../data.js';
   import { notifications, currentUser, goTo } from '../stores.js';
   import StatCard from '../StatCard.svelte';
   import Donut from '../Donut.svelte';
   import { statusClass } from '../badge.js';
+
+  let currentHour = new Date().getHours();
+
+  onMount(() => {
+    const clock = setInterval(() => {
+      currentHour = new Date().getHours();
+    }, 60000);
+
+    return () => clearInterval(clock);
+  });
+
+  $: greeting = currentHour < 12 ? 'Good Morning' : currentHour < 18 ? 'Good Afternoon' : 'Good Evening';
+  $: roleTitle = $currentUser?.role === 'head_office' ? 'Admin' : $currentUser?.role === 'manager' ? 'Manager' : 'Agent';
+  $: greetingName = $currentUser ? `Mr ${roleTitle} ${$currentUser.name}` : '';
 
   $: totalRevenue = $bookings.reduce((s, b) => s + Number(b.amount || 0), 0);
 
@@ -26,7 +41,7 @@
 <div class="page">
   <div class="hero card">
     <div>
-      <h1>Good Morning, {$currentUser ? $currentUser.name.split(' ')[0] : ''} 👋</h1>
+      <h1>{greeting}, {greetingName} 👋</h1>
       <p>Here's what's happening with your travel business today.</p>
     </div>
   </div>
