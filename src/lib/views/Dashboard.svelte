@@ -33,6 +33,7 @@
     .reduce((sum, booking) => sum + Number(booking.amount || 0), 0);
   $: commissionRate = 0.05;
   $: completedCommission = completedRevenue * commissionRate;
+  $: isAgent = $currentUser?.role === 'agent';
   $: totalExpenses = $expenses
     .filter((expense) => expense.status === 'Paid')
     .reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
@@ -75,6 +76,17 @@
     <StatCard label="Upcoming Bookings" value={upcomingBookings} icon="🗓️" color="#1d4ed8" bg="#dbeafe" />
     <StatCard label="Booking Success" value={completionRate + '%'} icon="📈" color="#0f766e" bg="#ccfbf1" />
   </div>
+
+  {#if isAgent}
+    <div class="card agent-commission-card">
+      <div>
+        <div class="stat-label">My Commission</div>
+        <div class="agent-commission-value">₹{Math.round(completedCommission).toLocaleString('en-IN')}</div>
+        <div class="commission-note">Based on completed trips · {commissionRate * 100}% commission</div>
+      </div>
+      <div class="commission-icon">💰</div>
+    </div>
+  {/if}
 
   <div class="two-col" style="margin-bottom:20px;">
     <div class="card">
@@ -170,4 +182,8 @@
 .net-row{color:var(--teal-dark);font-size:14px;}
 .commission-card{border-color:#99f6e4;}
 .report-help{color:var(--text-dim);font-size:12px;margin:-4px 0 10px;}
+.agent-commission-card{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;background:linear-gradient(120deg,#ecfdf5,#f0fdfa);border-color:#99f6e4;}
+.agent-commission-value{font-size:28px;font-weight:800;color:var(--teal-dark);margin-top:4px;}
+.commission-note{color:var(--text-dim);font-size:12px;margin-top:3px;}
+.commission-icon{width:48px;height:48px;border-radius:14px;background:#ccfbf1;display:flex;align-items:center;justify-content:center;font-size:24px;}
 </style>
