@@ -121,28 +121,54 @@ INSERT INTO clients (id,name,email,phone,type,status) VALUES
 ('CL-002','Priya Sharma','priya@example.com','+91 87654 12930','Regular','Active'),
 ('CL-003','Suresh Babu','suresh@example.com','+91 98543 21098','Regular','Active'),
 ('CL-004','Karthik S','karthik@example.com','+91 95432 10987','New','Active'),
-('CL-005','Meena R','meena@example.com','+91 94321 09876','VIP','Inactive');
+('CL-005','Meena R','meena@example.com','+91 94321 09876','VIP','Inactive'),
+('CL-006','Arjun Nair','arjun@example.com','+91 90000 10001','VIP','Active'),
+('CL-007','Divya Menon','divya@example.com','+91 90000 10002','Regular','Active'),
+('CL-008','Vikram Singh','vikram@example.com','+91 90000 10003','New','Active'),
+('CL-009','Ananya Rao','ananya@example.com','+91 90000 10004','VIP','Active'),
+('CL-010','Rahul Das','rahul@example.com','+91 90000 10005','Regular','Inactive'),
+('CL-011','Nisha Patel','nisha@example.com','+91 90000 10006','Regular','Active'),
+('CL-012','Manoj Iyer','manoj@example.com','+91 90000 10007','New','Active');
 
 INSERT INTO trips (id,name,destination,start_date,end_date,status) VALUES
 ('TR-001','Kerala Tour','Kerala','2026-09-20','2026-09-25','Confirmed'),
 ('TR-002','Singapore Trip','Singapore','2026-09-25','2026-10-01','Pending'),
 ('TR-003','Dubai Holiday','UAE','2026-10-02','2026-10-07','Confirmed'),
 ('TR-004','Bali Trip','Indonesia','2026-10-10','2026-10-15','Pending'),
-('TR-005','Andaman Tour','Andaman','2026-10-18','2026-10-22','Completed');
+('TR-005','Andaman Tour','Andaman','2026-10-18','2026-10-22','Completed'),
+('TR-006','Rajasthan Heritage','Rajasthan','2026-11-01','2026-11-07','Confirmed'),
+('TR-007','Maldives Escape','Maldives','2026-11-10','2026-11-14','Pending'),
+('TR-008','Japan Explorer','Japan','2026-11-20','2026-11-29','Pending'),
+('TR-009','Europe Highlights','Europe','2026-12-01','2026-12-12','Confirmed'),
+('TR-010','Goa Weekend','Goa','2026-12-15','2026-12-18','Completed'),
+('TR-011','Australia Adventure','Australia','2027-01-05','2027-01-15','Pending'),
+('TR-012','Himachal Snow Tour','Himachal Pradesh','2027-01-20','2027-01-26','Confirmed');
 
 INSERT INTO bookings (id,client_name,trip_name,travel_date,status,amount) VALUES
 ('BKG-0001','Ravi Kumar','Kerala Tour','2026-09-20','Confirmed',25000),
 ('BKG-0002','Priya Sharma','Singapore Trip','2026-09-25','Pending',48500),
 ('BKG-0003','Suresh Babu','Dubai Holiday','2026-10-02','Paid',72000),
 ('BKG-0004','Karthik S','Bali Trip','2026-10-10','Partial',115000),
-('BKG-0005','Meena R','Andaman Tour','2026-10-18','Pending Payment',38000);
+('BKG-0005','Meena R','Andaman Tour','2026-10-18','Pending Payment',38000),
+('BKG-0006','Arjun Nair','Rajasthan Heritage','2026-11-01','Confirmed',68000),
+('BKG-0007','Divya Menon','Maldives Escape','2026-11-10','Pending',92000),
+('BKG-0008','Vikram Singh','Japan Explorer','2026-11-20','Partial',145000),
+('BKG-0009','Ananya Rao','Europe Highlights','2026-12-01','Paid',185000),
+('BKG-0010','Rahul Das','Goa Weekend','2026-12-15','Confirmed',32000),
+('BKG-0011','Nisha Patel','Australia Adventure','2027-01-05','Pending Payment',210000),
+('BKG-0012','Manoj Iyer','Himachal Snow Tour','2027-01-20','Pending',56000);
 
 INSERT INTO suppliers (id,name,type,contact,status) VALUES
 ('SUP-001','Hotel Grand Palace','Hotel','+91 98765 12345','Active'),
 ('SUP-002','Sky Travels','Travels','+91 87654 98765','Active'),
 ('SUP-003','Global Tours','Package','+91 76543 87654','Active'),
 ('SUP-004','Sunshine Hotels','Hotel','+91 65432 76543','Inactive'),
-('SUP-005','Wanderlust Travels','Package','+91 54321 65432','Active');
+('SUP-005','Wanderlust Travels','Package','+91 54321 65432','Active'),
+('SUP-006','Royal Rajasthan Stays','Hotel','+91 54321 11111','Active'),
+('SUP-007','Island Blue Resorts','Hotel','+91 54321 22222','Active'),
+('SUP-008','Tokyo Connect','Travels','+91 54321 33333','Active'),
+('SUP-009','Euro Link Holidays','Package','+91 54321 44444','Active'),
+('SUP-010','Mountain Trails','Travels','+91 54321 55555','Inactive');
 
 INSERT INTO payments (id,name,method,amount,date,status) VALUES
 ('PAY-001','Ravi Kumar','Bank Transfer',25000,'2026-09-18','Received'),
@@ -168,6 +194,40 @@ INSERT INTO itinerary_items (day_id, time, text) VALUES
 (1,'03:00 PM','City Tour'),
 (2,'09:00 AM','Universal Studios'),
 (2,'05:00 PM','Sentosa Island');
+
+INSERT INTO itineraries (trip_id, trip_name) VALUES
+('TR-001','Kerala Tour'),
+('TR-003','Dubai Holiday'),
+('TR-006','Rajasthan Heritage'),
+('TR-009','Europe Highlights');
+
+INSERT INTO itinerary_days (trip_id, label, day_order) VALUES
+('TR-001','Day 1 - Arrival in Kochi',1),
+('TR-001','Day 2 - Munnar Sightseeing',2),
+('TR-003','Day 1 - Dubai City Tour',1),
+('TR-003','Day 2 - Desert Safari',2),
+('TR-006','Day 1 - Jaipur Heritage Walk',1),
+('TR-006','Day 2 - Udaipur Lake Tour',2),
+('TR-009','Day 1 - Paris Arrival',1),
+('TR-009','Day 2 - Eiffel Tower Tour',2);
+
+INSERT INTO itinerary_items (day_id, time, text) VALUES
+(3,'10:00 AM','Arrive at Kochi Airport'),
+(3,'02:00 PM','Hotel Check-in and Welcome Lunch'),
+(4,'09:00 AM','Munnar Tea Garden Visit'),
+(4,'04:00 PM','Mattupetty Dam Sightseeing'),
+(5,'10:00 AM','Burj Khalifa and Dubai Mall'),
+(5,'07:00 PM','Dubai Marina Dinner Cruise'),
+(6,'03:00 PM','Desert Safari Pickup'),
+(6,'08:00 PM','BBQ Dinner and Cultural Show'),
+(7,'09:00 AM','Amber Fort Visit'),
+(7,'02:00 PM','Jaipur City Palace'),
+(8,'10:00 AM','Udaipur Lake Palace Boat Ride'),
+(8,'05:00 PM','Local Market Walk'),
+(9,'11:00 AM','Arrive in Paris and Hotel Check-in'),
+(9,'06:00 PM','Seine River Evening Cruise'),
+(10,'09:00 AM','Eiffel Tower and Louvre Museum'),
+(10,'04:00 PM','Montmartre Walking Tour');
 
 INSERT INTO reviews (name, rating, text, review_date, username) VALUES
 ('Ravi Kumar',5,'Amazing trip! Everything was well planned. Highly recommend.','15 Sep 2026','ravi'),
