@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { clients, trips, bookings, destinations } from '../data.js';
+  import { clients, trips, bookings, expenses, destinations } from '../data.js';
   import { notifications, currentUser, goTo } from '../stores.js';
   import StatCard from '../StatCard.svelte';
   import Donut from '../Donut.svelte';
@@ -27,6 +27,16 @@
     .reduce((s, b) => s + Number(b.amount || 0), 0);
   $: upcomingBookings = $bookings.filter((b) => b.travelDate && new Date(b.travelDate) >= new Date()).length;
   $: completionRate = $bookings.length ? Math.round((confirmedBookings / $bookings.length) * 100) : 0;
+  $: completedTripNames = new Set($trips.filter((trip) => trip.status === 'Completed').map((trip) => trip.name));
+  $: completedRevenue = $bookings
+    .filter((booking) => completedTripNames.has(booking.tripName))
+    .reduce((sum, booking) => sum + Number(booking.amount || 0), 0);
+  $: commissionRate = 0.05;
+  $: completedCommission = completedRevenue * commissionRate;
+  $: totalExpenses = $expenses
+    .filter((expense) => expense.status === 'Paid')
+    .reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
+  $: netRevenue = totalRevenue - totalExpenses;
 
   $: clientSegs = [
     { label: 'Active', value: $clients.filter(c=>c.status==='Active').length, color: '#16a34a' },
@@ -123,8 +133,16 @@
         <div class="card">
           <h3 style="margin-top:0;">Business Reports</h3>
           <div class="report-row"><span>Monthly Revenue</span><b>₹{totalRevenue.toLocaleString('en-IN')}</b></div>
+          <div class="report-row"><span>Paid Expenses</span><b>− ₹{totalExpenses.toLocaleString('en-IN')}</b></div>
+          <div class="report-row net-row"><span>Net Revenue</span><b>₹{netRevenue.toLocaleString('en-IN')}</b></div>
           <div class="report-row"><span>Profit Margin (est.)</span><b>18%</b></div>
-          <div class="report-row"><span>Agent Commissions (est.)</span><b>₹{Math.round(totalRevenue*0.05).toLocaleString('en-IN')}</b></div>
+        </div>
+        <div class="card commission-card">
+          <h3 style="margin-top:0;">Completed Trip Commission</h3>
+          <p class="report-help">Commission is calculated only after a trip is marked Completed.</p>
+          <div class="report-row"><span>Completed Trip Revenue</span><b>₹{completedRevenue.toLocaleString('en-IN')}</b></div>
+          <div class="report-row"><span>Commission Rate</span><b>{commissionRate * 100}%</b></div>
+          <div class="report-row net-row"><span>Agent Commission</span><b>₹{Math.round(completedCommission).toLocaleString('en-IN')}</b></div>
         </div>
       {/if}
     </div>
@@ -149,4 +167,7 @@
 .dest-item small{color:var(--text-dim);font-size:11px;}
 .report-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px;}
 .report-row:last-child{border-bottom:none;}
+.net-row{color:var(--teal-dark);font-size:14px;}
+.commission-card{border-color:#99f6e4;}
+.report-help{color:var(--text-dim);font-size:12px;margin:-4px 0 10px;}
 </style>
