@@ -14,7 +14,8 @@
   --blue:#2563eb;
   --purple:#7c3aed;
 }
-body.dark-mode{
+html.dark-mode,
+html[data-theme='dark']{
   --bg:#0f172a;
   --card:#172033;
   --border:#2d3a50;
@@ -117,13 +118,20 @@ tr:last-child td{border-bottom:none;}
 
 .empty-state{text-align:center;color:var(--text-dim);padding:40px 10px;font-size:14px;}
 
-body.dark-mode .user-chip{background:var(--card);color:var(--text);}
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode textarea{background:#111a2b;color:var(--text);}
-body.dark-mode .day-block{background:#111a2b;}
-body.dark-mode .btn-icon:hover{background:#24324a;}
-body.dark-mode .donut-hole{background:var(--card);}
+html.dark-mode .user-chip,
+html[data-theme='dark'] .user-chip{background:var(--card);color:var(--text);}
+html.dark-mode input,
+html.dark-mode select,
+html.dark-mode textarea,
+html[data-theme='dark'] input,
+html[data-theme='dark'] select,
+html[data-theme='dark'] textarea{background:#111a2b;color:var(--text);}
+html.dark-mode .day-block,
+html[data-theme='dark'] .day-block{background:#111a2b;}
+html.dark-mode .btn-icon:hover,
+html[data-theme='dark'] .btn-icon:hover{background:#24324a;}
+html.dark-mode .donut-hole,
+html[data-theme='dark'] .donut-hole{background:var(--card);}
 @media print{
   .sidebar,.topbar,.crumbs,.page-header button,.header-actions{display:none !important;}
   .main-content,.page{padding:0;max-width:none;}

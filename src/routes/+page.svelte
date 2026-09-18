@@ -1,6 +1,5 @@
 <script>
   import '../app.css';
-  import { onMount } from 'svelte';
   import { currentUser, currentPage, darkMode, loadNotifications } from '$lib/stores.js';
   import { loadAllData } from '$lib/data.js';
   import Login from '$lib/views/Login.svelte';
@@ -22,6 +21,11 @@
   let loadError = '';
 
   function handleSearch(q) { searchQuery = q; }
+
+  $: if (typeof document !== 'undefined') {
+    document.documentElement.classList.toggle('dark-mode', $darkMode);
+    document.documentElement.dataset.theme = $darkMode ? 'dark' : 'light';
+  }
 
   $: if ($currentUser) fetchAll();
 
@@ -78,8 +82,6 @@
     </div>
   </div>
 {/if}
-
-<svelte:body class:dark-mode={$darkMode} />
 
 <style>
 .app-shell{display:flex;min-height:100vh;}
