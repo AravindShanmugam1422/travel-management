@@ -3,7 +3,7 @@ import { getPool } from '$lib/server/db.js';
 
 export async function GET() {
   const pool = getPool();
-  const [rows] = await pool.query("SELECT * FROM notifications WHERE text NOT LIKE '%logged in%' ORDER BY created_at DESC LIMIT 20");
+  const [rows] = await pool.query("SELECT * FROM notifications WHERE LOWER(text) NOT LIKE '%logged in%' ORDER BY created_at DESC LIMIT 20");
   return json(rows);
 }
 

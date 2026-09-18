@@ -128,8 +128,8 @@ h1{font-size:40px;line-height:1.15;margin:0 0 16px;font-weight:800;}
 .feature-row{display:flex;flex-direction:column;gap:14px;}
 .feature{display:flex;align-items:center;gap:10px;font-size:14px;color:#e2e8f0;}
 .feature span{width:34px;height:34px;background:rgba(255,255,255,.08);border-radius:9px;display:flex;align-items:center;justify-content:center;}
-.login-right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px;background:#f4f7fb;}
-.login-card{width:100%;max-width:400px;background:#fff;border-radius:16px;padding:32px;box-shadow:0 10px 40px rgba(16,24,40,.08);}
+.login-right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px;background:var(--bg);}
+.login-card{width:100%;max-width:400px;background:var(--card);border-radius:16px;padding:32px;box-shadow:0 10px 40px rgba(16,24,40,.08);}
 .login-card h2{margin:0 0 4px;font-size:22px;}
 .sub{color:var(--text-dim);font-size:13.5px;margin:0 0 20px;}
 .role-tabs{display:flex;gap:8px;margin-bottom:20px;}

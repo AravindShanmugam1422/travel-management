@@ -6,10 +6,12 @@
   export let onSearch = () => {};
   let query = '';
   let showNotif = false;
+  let showReminder = false;
   let showUserMenu = false;
   let showAddAgent = false;
   let agentName = '', agentUsername = '', agentPassword = '';
   let agentMsg = '';
+  let reminderText = '', reminderTime = '';
 
   const dispatch = createEventDispatcher();
 
@@ -34,6 +36,17 @@
       agentMsg = e.message;
     }
   }
+
+  async function addReminder() {
+    if (!reminderText.trim()) return;
+    try {
+      const reminder = await apiPost('/notifications', { text: reminderText.trim(), time: reminderTime || 'Just now' });
+      notifications.update((list) => [reminder, ...list]);
+      reminderText = ''; reminderTime = ''; showReminder = false;
+    } catch (e) {
+      agentMsg = e.message;
+    }
+  }
 </script>
 
 <header class="topbar">
@@ -47,14 +60,13 @@
       <button class="btn btn-outline" on:click={() => (showAddAgent = true)}>+ Add Agent</button>
     {/if}
 
-    {#if $currentUser && ($currentUser.role === 'manager' || $currentUser.role === 'head_office')}
-      <button class="icon-btn" on:click={() => (showNotif = !showNotif)}>
-        🔔
-        {#if $notifications.length}
-          <span class="dot-badge">{$notifications.length}</span>
-        {/if}
-      </button>
-    {/if}
+    <button class="btn btn-outline reminder-btn" on:click={() => (showReminder = true)}>＋ Reminder</button>
+    <button class="icon-btn" on:click={() => (showNotif = !showNotif)} title="Notifications">
+      🔔
+      {#if $notifications.length}
+        <span class="dot-badge">{$notifications.length}</span>
+      {/if}
+    </button>
     <button class="icon-btn" on:click={goHome} title="Home">🏠</button>
     <button class="icon-btn" on:click={toggleDarkMode} title="Toggle dark mode">{$darkMode ? '☀️' : '🌙'}</button>
 
@@ -109,10 +121,21 @@
   </div>
 {/if}
 
+{#if showReminder}
+  <div class="modal-backdrop" on:click|self={() => (showReminder = false)}>
+    <div class="modal">
+      <div class="modal-title"><span>Add Reminder</span><button class="btn-icon" on:click={() => (showReminder = false)}>✕</button></div>
+      <div class="form-row"><label>Reminder</label><input bind:value={reminderText} placeholder="e.g. Payment due for Ravi Kumar" /></div>
+      <div class="form-row"><label>Date / Time</label><input bind:value={reminderTime} placeholder="e.g. 20 Sep 2026, 10:00 AM" /></div>
+      <div class="form-actions"><button class="btn btn-outline" on:click={() => (showReminder = false)}>Cancel</button><button class="btn btn-primary" on:click={addReminder}>Add Reminder</button></div>
+    </div>
+  </div>
+{/if}
+
 <style>
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:14px 26px;background:#fff;border-bottom:1px solid var(--border);
+  padding:14px 26px;background:var(--card);border-bottom:1px solid var(--border);
   position:sticky;top:0;z-index:50;gap:16px;
 }
 .topbar-right{display:flex;align-items:center;gap:12px;position:relative;}
@@ -129,7 +152,7 @@
 .avatar-sm{width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
 .user-chip-text{display:flex;flex-direction:column;align-items:flex-start;font-size:12px;line-height:1.3;}
 .dropdown{
-  position:absolute;top:52px;right:0;background:#fff;border:1px solid var(--border);
+  position:absolute;top:52px;right:0;background:var(--card);border:1px solid var(--border);
   border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12);min-width:260px;z-index:60;
 }
 .notif-dropdown{max-height:300px;overflow-y:auto;}
@@ -139,13 +162,15 @@
 .dropdown-item{width:100%;text-align:left;padding:12px 16px;background:none;border:none;font-size:14px;}
 .dropdown-item:hover{background:#f1f5f9;}
 .msg{font-size:13px;color:var(--teal-dark);margin-top:-6px;margin-bottom:10px;}
+.reminder-btn{white-space:nowrap;}
 
 @media (max-width:640px){
   .topbar{padding:10px 12px;gap:8px;}
   .search-box{min-width:0;padding:7px 9px;}
   .search-box input{font-size:12px;}
   .topbar-right{gap:6px;}
-  .topbar-right > .btn-outline{display:none;}
+  .topbar-right > .btn-outline:not(.reminder-btn){display:none;}
+  .reminder-btn{font-size:11px;padding:7px 8px;}
   .user-chip{padding:5px;}
   .user-chip-text{display:none;}
   .dropdown{min-width:220px;}
