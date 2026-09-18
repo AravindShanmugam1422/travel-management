@@ -21,6 +21,12 @@
   $: greetingName = $currentUser ? `${roleTitle} Mr ${$currentUser.name}` : '';
 
   $: totalRevenue = $bookings.reduce((s, b) => s + Number(b.amount || 0), 0);
+  $: confirmedBookings = $bookings.filter((b) => b.status === 'Confirmed' || b.status === 'Paid').length;
+  $: pendingPaymentAmount = $bookings
+    .filter((b) => b.status === 'Pending Payment' || b.status === 'Partial')
+    .reduce((s, b) => s + Number(b.amount || 0), 0);
+  $: upcomingBookings = $bookings.filter((b) => b.travelDate && new Date(b.travelDate) >= new Date()).length;
+  $: completionRate = $bookings.length ? Math.round((confirmedBookings / $bookings.length) * 100) : 0;
 
   $: clientSegs = [
     { label: 'Active', value: $clients.filter(c=>c.status==='Active').length, color: '#16a34a' },
@@ -51,6 +57,13 @@
     <StatCard label="Total Trips" value={$trips.length} icon="✈️" color="#16a34a" bg="#dcfce7" />
     <StatCard label="Total Bookings" value={$bookings.length} icon="📅" color="#7c3aed" bg="#f3e8ff" />
     <StatCard label="Total Revenue" value={'₹' + totalRevenue.toLocaleString('en-IN')} icon="💰" color="#d97706" bg="#fef3c7" />
+  </div>
+
+  <div class="stat-row">
+    <StatCard label="Confirmed Bookings" value={confirmedBookings} icon="✅" color="#15803d" bg="#dcfce7" />
+    <StatCard label="Pending Payment" value={'₹' + pendingPaymentAmount.toLocaleString('en-IN')} icon="⏳" color="#b45309" bg="#fef3c7" />
+    <StatCard label="Upcoming Bookings" value={upcomingBookings} icon="🗓️" color="#1d4ed8" bg="#dbeafe" />
+    <StatCard label="Booking Success" value={completionRate + '%'} icon="📈" color="#0f766e" bg="#ccfbf1" />
   </div>
 
   <div class="two-col" style="margin-bottom:20px;">
