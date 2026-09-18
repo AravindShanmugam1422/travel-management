@@ -1,37 +1,16 @@
 <script>
-  import { onMount } from 'svelte';
-  import { currentUser, notify } from '../stores.js';
-  import { apiGet, apiPost } from '../api.js';
+  import { currentUser } from '../stores.js';
+  import { apiPost } from '../api.js';
 
   let mode = 'login'; // 'login' | 'signup'
-  let role = 'agent';
   let username = '', password = '', name = '', confirm = '';
   let error = '', info = '', loading = false;
-  let headOfficeCount = 0, managerCount = 0;
-
-  onMount(refreshCounts);
-  async function refreshCounts() {
-    try {
-      const c = await apiGet('/users');
-      headOfficeCount = c.headOffice;
-      managerCount = c.manager;
-    } catch (e) { /* ignore - counts are just a UI hint */ }
-  }
-
-  $: headOfficeFull = headOfficeCount >= 2;
-  $: managerFull = managerCount >= 1;
-
-  function selectRole(r) {
-    role = r;
-    error = ''; info = '';
-  }
 
   async function doLogin() {
     error = ''; loading = true;
     try {
-      const u = await apiPost('/auth/login', { username, password, role });
+      const u = await apiPost('/auth/login', { username, password });
       currentUser.set(u);
-      notify(`${u.name} logged in`);
     } catch (e) {
       error = e.message;
     } finally {
@@ -41,18 +20,6 @@
 
   async function doSignup() {
     error = ''; info = '';
-    if (role === 'agent') {
-      error = 'Agent accounts are created by your Manager / Head Office, not via signup.';
-      return;
-    }
-    if (role === 'head_office' && headOfficeFull) {
-      error = 'Head Office signups are full (max 2). Ask an admin to remove an account first.';
-      return;
-    }
-    if (role === 'manager' && managerFull) {
-      error = 'Manager signup is full (max 1).';
-      return;
-    }
     if (!name || !username || !password || !confirm) {
       error = 'Please fill all fields.';
       return;
@@ -63,11 +30,10 @@
     }
     loading = true;
     try {
-      await apiPost('/auth/signup', { name, username, password, role });
-      info = 'Account created! You can now log in.';
+      await apiPost('/auth/signup', { name, username, password });
+      info = 'Account created! Your access role was assigned automatically. You can now log in.';
       mode = 'login';
       name = ''; confirm = '';
-      refreshCounts();
     } catch (e) {
       error = e.message;
     } finally {
@@ -104,12 +70,6 @@
         <p class="sub">Sign up to get started</p>
       {/if}
 
-      <div class="role-tabs">
-        <button class:active={role==='agent'} on:click={() => selectRole('agent')}>Agent</button>
-        <button class:active={role==='manager'} on:click={() => selectRole('manager')}>Manager</button>
-        <button class:active={role==='head_office'} on:click={() => selectRole('head_office')}>Head Office</button>
-      </div>
-
       {#if mode === 'signup'}
         <div class="form-row">
           <label>Full Name</label>
@@ -130,13 +90,6 @@
           <label>Confirm Password</label>
           <input type="password" bind:value={confirm} placeholder="Confirm your password" />
         </div>
-      {/if}
-
-      {#if mode === 'signup' && role === 'head_office'}
-        <div class="hint">{headOfficeCount}/2 Head Office accounts used</div>
-      {/if}
-      {#if mode === 'signup' && role === 'manager'}
-        <div class="hint">{managerCount}/1 Manager account used</div>
       {/if}
 
       {#if error}<div class="error">{error}</div>{/if}

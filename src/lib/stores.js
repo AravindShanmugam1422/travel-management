@@ -48,7 +48,11 @@ export function goHome() {
 // ---------- notifications ----------
 export const notifications = writable([]);
 
-export async function loadNotifications() {
+export async function loadNotifications(role) {
+  if (role === 'agent') {
+    notifications.set([]);
+    return;
+  }
   try { notifications.set(await apiGet('/notifications')); } catch (e) { /* ignore */ }
 }
 

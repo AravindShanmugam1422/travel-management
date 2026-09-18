@@ -47,12 +47,14 @@
       <button class="btn btn-outline" on:click={() => (showAddAgent = true)}>+ Add Agent</button>
     {/if}
 
-    <button class="icon-btn" on:click={() => (showNotif = !showNotif)}>
-      🔔
-      {#if $notifications.length}
-        <span class="dot-badge">{$notifications.length}</span>
-      {/if}
-    </button>
+    {#if $currentUser && ($currentUser.role === 'manager' || $currentUser.role === 'head_office')}
+      <button class="icon-btn" on:click={() => (showNotif = !showNotif)}>
+        🔔
+        {#if $notifications.length}
+          <span class="dot-badge">{$notifications.length}</span>
+        {/if}
+      </button>
+    {/if}
     <button class="icon-btn" on:click={goHome} title="Home">🏠</button>
     <button class="icon-btn" on:click={toggleDarkMode} title="Toggle dark mode">{$darkMode ? '☀️' : '🌙'}</button>
 

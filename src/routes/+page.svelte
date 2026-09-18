@@ -32,7 +32,7 @@
     loading = true;
     loadError = '';
     try {
-      await Promise.all([loadAllData(), loadNotifications()]);
+      await Promise.all([loadAllData(), loadNotifications($currentUser.role)]);
     } catch (e) {
       loadError = 'Could not load data from the database. Check your .env connection settings.';
     } finally {

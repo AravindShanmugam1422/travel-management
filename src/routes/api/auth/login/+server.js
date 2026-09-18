@@ -3,9 +3,9 @@ import { getPool } from '$lib/server/db.js';
 import { verifyPassword } from '$lib/server/auth.js';
 
 export async function POST(event) {
-  const { username, password, role } = await event.request.json();
+  const { username, password } = await event.request.json();
   const pool = getPool();
-  const [rows] = await pool.query('SELECT * FROM users WHERE username=? AND role=?', [username, role]);
+  const [rows] = await pool.query('SELECT * FROM users WHERE username=?', [username]);
   if (!rows.length || !verifyPassword(password, rows[0].password)) {
     return json({ error: 'Invalid username, password, or role.' }, { status: 401 });
   }
