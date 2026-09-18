@@ -6,6 +6,7 @@
     { key: 'clients', label: 'Clients', icon: '👥' },
     { key: 'trips', label: 'Trips', icon: '✈️' },
     { key: 'itinerary', label: 'Itinerary', icon: '🗓️' },
+    { key: 'calendar', label: 'Calendar', icon: '📆' },
     { key: 'suppliers', label: 'Suppliers', icon: '🏢' },
     { key: 'bookings', label: 'Bookings', icon: '📅' },
     { key: 'payments', label: 'Payments', icon: '💳' },

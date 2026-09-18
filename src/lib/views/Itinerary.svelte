@@ -2,6 +2,7 @@
   import { trips, itineraries } from '../data.js';
   import { goBack, goTo, notify } from '../stores.js';
   import { apiPost, apiDelete } from '../api.js';
+  import { printPdf } from '../export.js';
 
   let selectedTrip = $trips[0]?.id || '';
   let showAddDay = false;
@@ -85,7 +86,7 @@
     <div class="card">
       <div class="card-head">
         <h3 style="margin:0;">{itin.tripName} &mdash; Itinerary</h3>
-        <button class="btn btn-primary" on:click={() => (showAddDay = true)}>+ New Day</button>
+        <div class="header-actions"><button class="btn btn-outline" on:click={() => printPdf(`${itin.tripName} Itinerary`)}>🖨 PDF</button><button class="btn btn-primary" on:click={() => (showAddDay = true)}>+ New Day</button></div>
       </div>
 
       {#if showAddDay}

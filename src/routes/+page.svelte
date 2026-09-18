@@ -1,7 +1,7 @@
 <script>
   import '../app.css';
   import { onMount } from 'svelte';
-  import { currentUser, currentPage, loadNotifications } from '$lib/stores.js';
+  import { currentUser, currentPage, darkMode, loadNotifications } from '$lib/stores.js';
   import { loadAllData } from '$lib/data.js';
   import Login from '$lib/views/Login.svelte';
   import Sidebar from '$lib/Sidebar.svelte';
@@ -10,6 +10,7 @@
   import Clients from '$lib/views/Clients.svelte';
   import Trips from '$lib/views/Trips.svelte';
   import Itinerary from '$lib/views/Itinerary.svelte';
+  import Calendar from '$lib/views/Calendar.svelte';
   import Suppliers from '$lib/views/Suppliers.svelte';
   import Bookings from '$lib/views/Bookings.svelte';
   import Payments from '$lib/views/Payments.svelte';
@@ -60,6 +61,8 @@
           <Trips {searchQuery} />
         {:else if $currentPage === 'itinerary'}
           <Itinerary />
+        {:else if $currentPage === 'calendar'}
+          <Calendar />
         {:else if $currentPage === 'suppliers'}
           <Suppliers {searchQuery} />
         {:else if $currentPage === 'bookings'}
@@ -75,6 +78,8 @@
     </div>
   </div>
 {/if}
+
+<svelte:body class:dark-mode={$darkMode} />
 
 <style>
 .app-shell{display:flex;min-height:100vh;}

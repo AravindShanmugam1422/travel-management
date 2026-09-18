@@ -1,5 +1,5 @@
 <script>
-  import { notifications, currentUser, goHome } from './stores.js';
+  import { notifications, currentUser, darkMode, toggleDarkMode, goHome } from './stores.js';
   import { apiPost } from './api.js';
   import { createEventDispatcher } from 'svelte';
 
@@ -54,6 +54,7 @@
       {/if}
     </button>
     <button class="icon-btn" on:click={goHome} title="Home">🏠</button>
+    <button class="icon-btn" on:click={toggleDarkMode} title="Toggle dark mode">{$darkMode ? '☀️' : '🌙'}</button>
 
     {#if $currentUser}
       <button class="user-chip" on:click={() => (showUserMenu = !showUserMenu)}>

@@ -4,6 +4,7 @@
   import { statusClass } from '../badge.js';
   import Modal from '../Modal.svelte';
   import { apiPost, apiPut, apiDelete } from '../api.js';
+  import { downloadCsv, printPdf } from '../export.js';
 
   export let searchQuery = '';
   let filter = 'All';
@@ -36,13 +37,28 @@
     try { await apiDelete(`/bookings/${id}`); bookings.update(l=>l.filter(b=>b.id!==id)); }
     catch(e){ alert(e.message); }
   }
+
+  $: viewingClient = viewing ? $clients.find((client) => client.name === viewing.clientName) : null;
+
+  function notifyWhatsApp() {
+    if (!viewingClient?.phone) return;
+    const message = `Hello ${viewing.clientName}, your ${viewing.tripName} booking is ${viewing.status}. Travel date: ${viewing.travelDate}.`;
+    window.open(`https://wa.me/${viewingClient.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+  }
+
+  function exportBookings() {
+    downloadCsv('travel-bookings.csv', filtered.map((booking) => ({
+      ID: booking.id, Client: booking.clientName, Trip: booking.tripName,
+      TravelDate: booking.travelDate, Status: booking.status, Amount: booking.amount
+    })));
+  }
 </script>
 
 <div class="page">
   <div class="crumbs"><button on:click={goBack}>← Back</button><span>/</span><button on:click={() => goTo('dashboard')}>Home</button></div>
   <div class="page-header">
     <div><h1 class="page-title">Bookings</h1><div class="page-sub">Track and manage all client bookings</div></div>
-    <button class="btn btn-primary" on:click={openAdd}>+ New Booking</button>
+    <div class="header-actions"><button class="btn btn-outline" on:click={exportBookings}>⬇ CSV</button><button class="btn btn-outline" on:click={() => printPdf('Travel Bookings')}>🖨 PDF</button><button class="btn btn-primary" on:click={openAdd}>+ New Booking</button></div>
   </div>
 
   <div class="stat-row">
@@ -113,6 +129,9 @@
 
 {#if viewing}
   <Modal title="Booking Details" on:close={() => (viewing=null)}>
+    {#if viewingClient}
+      <div class="contact-actions"><a class="btn btn-outline" href={`mailto:${viewingClient.email}`}>✉ Email Update</a><button class="btn btn-outline" on:click={notifyWhatsApp}>💬 WhatsApp Update</button></div>
+    {/if}
     <div class="detail-row"><span>Booking ID</span><b>{viewing.id}</b></div>
     <div class="detail-row"><span>Client</span><b>{viewing.clientName}</b></div>
     <div class="detail-row"><span>Trip</span><b>{viewing.tripName}</b></div>
@@ -125,4 +144,5 @@
 <style>
 .detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;}
 .detail-row:last-child{border-bottom:none;}
+.contact-actions{display:flex;gap:8px;margin-bottom:12px;}
 </style>

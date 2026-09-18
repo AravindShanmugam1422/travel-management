@@ -1,5 +1,5 @@
 <script>
-  import { clients } from '../data.js';
+  import { clients, bookings } from '../data.js';
   import { goBack, goTo, notify } from '../stores.js';
   import { statusClass } from '../badge.js';
   import Modal from '../Modal.svelte';
@@ -12,6 +12,11 @@
   let editing = null;
   let form = { name:'', email:'', phone:'', type:'Regular', status:'Active' };
   let viewing = null;
+  let documents = {};
+
+  if (typeof localStorage !== 'undefined') {
+    try { documents = JSON.parse(localStorage.getItem('tm_client_documents') || '{}'); } catch (e) { documents = {}; }
+  }
 
   $: filters = [
     { key: 'All', count: $clients.length },
@@ -68,6 +73,33 @@
     } catch (e) {
       alert(e.message);
     }
+  }
+
+  $: clientBookings = viewing ? $bookings.filter((booking) => booking.clientName === viewing.name) : [];
+
+  function contactWhatsApp() {
+    window.open(`https://wa.me/${(viewing.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Hello ${viewing.name}, this is Travel Management.`)}`, '_blank');
+  }
+
+  function saveDocuments() {
+    localStorage.setItem('tm_client_documents', JSON.stringify(documents));
+  }
+
+  function uploadDocument(event) {
+    const file = event.target.files?.[0];
+    if (!file || !viewing) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      documents = { ...documents, [viewing.id]: [...(documents[viewing.id] || []), { name: file.name, type: file.type, data: reader.result }] };
+      saveDocuments();
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  }
+
+  function removeDocument(index) {
+    documents = { ...documents, [viewing.id]: documents[viewing.id].filter((_, i) => i !== index) };
+    saveDocuments();
   }
 </script>
 
@@ -140,16 +172,36 @@
 
 {#if viewing}
   <Modal title="Client Details" on:close={() => (viewing=null)}>
+    <div class="contact-actions"><a class="btn btn-outline" href={`mailto:${viewing.email}`}>✉ Email</a><button class="btn btn-outline" on:click={contactWhatsApp}>💬 WhatsApp</button></div>
     <div class="detail-row"><span>ID</span><b>{viewing.id}</b></div>
     <div class="detail-row"><span>Name</span><b>{viewing.name}</b></div>
     <div class="detail-row"><span>Email</span><b>{viewing.email}</b></div>
     <div class="detail-row"><span>Phone</span><b>{viewing.phone}</b></div>
     <div class="detail-row"><span>Type</span><b>{viewing.type}</b></div>
     <div class="detail-row"><span>Status</span><b>{viewing.status}</b></div>
+    <h3 class="section-title">Travel History</h3>
+    {#each clientBookings as booking}
+      <div class="history-row"><span>{booking.tripName}<small>{booking.travelDate}</small></span><b>{booking.status}<small>₹{Number(booking.amount).toLocaleString('en-IN')}</small></b></div>
+    {:else}<div class="empty-state compact">No booking history yet.</div>{/each}
+    <h3 class="section-title">Documents</h3>
+    <label class="upload-box">📎 Upload passport, ticket or voucher<input type="file" accept="image/*,.pdf,.doc,.docx" on:change={uploadDocument} /></label>
+    {#each documents[viewing.id] || [] as document, index}
+      <div class="document-row"><a href={document.data} download={document.name}>{document.name}</a><button class="btn-icon" title="Remove document" on:click={() => removeDocument(index)}>🗑️</button></div>
+    {:else}<div class="empty-state compact">No documents uploaded.</div>{/each}
   </Modal>
 {/if}
 
 <style>
 .detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;}
 .detail-row:last-child{border-bottom:none;}
+.contact-actions{display:flex;gap:8px;margin-bottom:12px;}
+.section-title{font-size:14px;margin:18px 0 8px;}
+.history-row,.document-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.history-row span,.history-row b{display:flex;flex-direction:column;gap:3px;}
+.history-row b{text-align:right;}
+.history-row small{color:var(--text-dim);font-weight:400;}
+.upload-box{display:block;border:1px dashed var(--border);border-radius:8px;padding:12px;text-align:center;color:var(--text-dim);font-size:13px;cursor:pointer;}
+.upload-box input{display:none;}
+.document-row a{color:var(--teal);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.compact{padding:10px 0;font-size:12px;}
 </style>

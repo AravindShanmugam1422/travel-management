@@ -16,6 +16,11 @@ function persisted(key, initial) {
 
 // currentUser only stores {id,name,username,role} - no password client-side
 export const currentUser = persisted('tm_current_user', null);
+export const darkMode = persisted('tm_dark_mode', false);
+
+export function toggleDarkMode() {
+  darkMode.update((enabled) => !enabled);
+}
 
 // ---------- navigation ----------
 export const currentPage = writable('dashboard');
