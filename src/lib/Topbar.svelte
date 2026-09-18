@@ -1,12 +1,13 @@
 <script>
   import { notifications, currentUser, darkMode, toggleDarkMode, goHome } from './stores.js';
-  import { apiPost } from './api.js';
+  import { apiPost, apiPut, apiDelete } from './api.js';
   import { createEventDispatcher } from 'svelte';
 
   export let onSearch = () => {};
   let query = '';
   let showNotif = false;
   let showReminder = false;
+  let editingReminder = null;
   let showUserMenu = false;
   let showAddAgent = false;
   let agentName = '', agentUsername = '', agentPassword = '';
@@ -40,9 +41,34 @@
   async function addReminder() {
     if (!reminderText.trim()) return;
     try {
-      const reminder = await apiPost('/notifications', { text: reminderText.trim(), time: reminderTime || 'Just now' });
-      notifications.update((list) => [reminder, ...list]);
+      const payload = { text: reminderText.trim(), time: reminderTime || 'Just now' };
+      if (editingReminder) {
+        const updated = await apiPut(`/notifications/${editingReminder}`, payload);
+        notifications.update((list) => list.map((item) => item.id === editingReminder ? updated : item));
+      } else {
+        const reminder = await apiPost('/notifications', payload);
+        notifications.update((list) => [reminder, ...list]);
+      }
       reminderText = ''; reminderTime = ''; showReminder = false;
+      editingReminder = null;
+    } catch (e) {
+      agentMsg = e.message;
+    }
+  }
+
+  function openReminderEditor(reminder) {
+    editingReminder = reminder.id;
+    reminderText = reminder.text;
+    reminderTime = reminder.time;
+    showNotif = false;
+    showReminder = true;
+  }
+
+  async function removeReminder(id) {
+    if (!confirm('Delete this reminder?')) return;
+    try {
+      await apiDelete(`/notifications/${id}`);
+      notifications.update((list) => list.filter((item) => item.id !== id));
     } catch (e) {
       agentMsg = e.message;
     }
@@ -86,8 +112,8 @@
       <div class="dropdown-title">Notifications</div>
       {#each $notifications as n}
         <div class="notif-item">
-          <div>{n.text}</div>
-          <small>{n.time}</small>
+          <div class="notif-content"><div>{n.text}</div><small>{n.time}</small></div>
+          <div class="notif-actions"><button class="btn-icon" title="Edit reminder" on:click={() => openReminderEditor(n)}>✏️</button><button class="btn-icon" title="Delete reminder" on:click={() => removeReminder(n.id)}>🗑️</button></div>
         </div>
       {:else}
         <div class="empty-state">No notifications</div>
@@ -124,10 +150,10 @@
 {#if showReminder}
   <div class="modal-backdrop" on:click|self={() => (showReminder = false)}>
     <div class="modal">
-      <div class="modal-title"><span>Add Reminder</span><button class="btn-icon" on:click={() => (showReminder = false)}>✕</button></div>
+      <div class="modal-title"><span>{editingReminder ? 'Edit Reminder' : 'Add Reminder'}</span><button class="btn-icon" on:click={() => { showReminder = false; editingReminder = null; }}>✕</button></div>
       <div class="form-row"><label>Reminder</label><input bind:value={reminderText} placeholder="e.g. Payment due for Ravi Kumar" /></div>
       <div class="form-row"><label>Date / Time</label><input bind:value={reminderTime} placeholder="e.g. 20 Sep 2026, 10:00 AM" /></div>
-      <div class="form-actions"><button class="btn btn-outline" on:click={() => (showReminder = false)}>Cancel</button><button class="btn btn-primary" on:click={addReminder}>Add Reminder</button></div>
+      <div class="form-actions"><button class="btn btn-outline" on:click={() => { showReminder = false; editingReminder = null; }}>Cancel</button><button class="btn btn-primary" on:click={addReminder}>{editingReminder ? 'Save Reminder' : 'Add Reminder'}</button></div>
     </div>
   </div>
 {/if}
@@ -159,6 +185,9 @@
 .dropdown-title{padding:12px 16px;font-weight:700;border-bottom:1px solid var(--border);font-size:14px;}
 .notif-item{padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px;}
 .notif-item small{color:var(--text-dim);}
+.notif-item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.notif-content{min-width:0;flex:1;}
+.notif-actions{display:flex;gap:2px;flex-shrink:0;}
 .dropdown-item{width:100%;text-align:left;padding:12px 16px;background:none;border:none;font-size:14px;}
 .dropdown-item:hover{background:#f1f5f9;}
 .msg{font-size:13px;color:var(--teal-dark);margin-top:-6px;margin-bottom:10px;}
