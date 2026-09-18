@@ -74,4 +74,14 @@
 .avatar{width:34px;height:34px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-weight:700;}
 .user-name{font-size:13px;font-weight:600;}
 .user-role{font-size:11px;color:#94a3b8;}
+
+@media (max-width:640px){
+  .sidebar{width:64px;min-width:64px;}
+  .brand{justify-content:center;padding:16px 8px;}
+  .brand > div:last-child,.nav-item > span:last-child,.user-box > div:last-child{display:none;}
+  .nav{padding:12px 8px;}
+  .nav-item{justify-content:center;padding:11px 8px;}
+  .nav-icon{width:auto;font-size:18px;}
+  .user-box{justify-content:center;padding:12px 8px;}
+}
 </style>

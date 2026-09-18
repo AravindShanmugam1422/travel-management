@@ -136,4 +136,15 @@
 .dropdown-item{width:100%;text-align:left;padding:12px 16px;background:none;border:none;font-size:14px;}
 .dropdown-item:hover{background:#f1f5f9;}
 .msg{font-size:13px;color:var(--teal-dark);margin-top:-6px;margin-bottom:10px;}
+
+@media (max-width:640px){
+  .topbar{padding:10px 12px;gap:8px;}
+  .search-box{min-width:0;padding:7px 9px;}
+  .search-box input{font-size:12px;}
+  .topbar-right{gap:6px;}
+  .topbar-right > .btn-outline{display:none;}
+  .user-chip{padding:5px;}
+  .user-chip-text{display:none;}
+  .dropdown{min-width:220px;}
+}
 </style>
