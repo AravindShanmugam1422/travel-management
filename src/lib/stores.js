@@ -18,6 +18,16 @@ function persisted(key, initial) {
 export const currentUser = persisted('tm_current_user', null);
 export const darkMode = persisted('tm_dark_mode', false);
 
+const rolePermissions = {
+  agent: ['dashboard', 'clients', 'bookings', 'service-review'],
+  manager: ['dashboard', 'clients', 'trips', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review'],
+  head_office: ['dashboard', 'clients', 'trips', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review']
+};
+
+export function canAccess(role, page) {
+  return rolePermissions[role]?.includes(page) || false;
+}
+
 export function toggleDarkMode() {
   darkMode.update((enabled) => !enabled);
 }

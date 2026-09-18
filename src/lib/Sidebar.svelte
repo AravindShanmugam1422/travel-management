@@ -1,5 +1,5 @@
 <script>
-  import { currentPage, goTo, currentUser } from './stores.js';
+  import { currentPage, goTo, currentUser, canAccess } from './stores.js';
 
   const items = [
     { key: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -31,7 +31,7 @@
   </div>
 
   <nav class="nav">
-    {#each items as it}
+    {#each items.filter((item) => canAccess($currentUser?.role, item.key)) as it}
       <button
         class="nav-item"
         class:active={$currentPage === it.key}

@@ -1,6 +1,6 @@
 <script>
   import '../app.css';
-  import { currentUser, currentPage, darkMode, loadNotifications } from '$lib/stores.js';
+  import { currentUser, currentPage, darkMode, loadNotifications, canAccess, goHome } from '$lib/stores.js';
   import { loadAllData } from '$lib/data.js';
   import Login from '$lib/views/Login.svelte';
   import Sidebar from '$lib/Sidebar.svelte';
@@ -28,6 +28,7 @@
   }
 
   $: if ($currentUser) fetchAll();
+  $: if ($currentUser && !canAccess($currentUser.role, $currentPage)) goHome();
 
   let fetchedFor = null;
   async function fetchAll() {
