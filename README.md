@@ -10,7 +10,6 @@ Full-stack version: SvelteKit frontend/API + Aiven MySQL database, ready to depl
    - username: `aravind`
    - password: `admin123`
 
-If the tables already exist and you only want the extra demo records, run `sample-data.sql` instead. It adds additional clients, trips, bookings, suppliers and itinerary items without recreating or deleting tables.
 
 ## 2. Configure your database connection
 
