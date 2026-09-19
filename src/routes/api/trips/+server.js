@@ -2,8 +2,14 @@ import { json } from '@sveltejs/kit';
 import { getPool } from '$lib/server/db.js';
 import { nextId } from '$lib/server/crud.js';
 
+function dateOnly(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value.slice(0, 10);
+  return value.toISOString().slice(0, 10);
+}
+
 function toApi(row) {
-  return { id: row.id, name: row.name, destination: row.destination, startDate: row.start_date, endDate: row.end_date, status: row.status };
+  return { id: row.id, name: row.name, destination: row.destination, startDate: dateOnly(row.start_date), endDate: dateOnly(row.end_date), status: row.status };
 }
 
 export async function GET() {

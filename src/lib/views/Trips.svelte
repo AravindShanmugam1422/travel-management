@@ -22,7 +22,7 @@
   });
 
   function openAdd(){ editing=null; form={name:'',destination:'',startDate:'',endDate:'',status:'Pending'}; showModal=true; }
-  function openEdit(t){ editing=t.id; form={...t}; showModal=true; }
+  function openEdit(t){ editing=t.id; form={...t, startDate:(t.startDate || '').slice(0, 10), endDate:(t.endDate || '').slice(0, 10)}; showModal=true; }
   async function save(){
     if(!form.name) return;
     try {
@@ -36,7 +36,7 @@
         notify(`New trip ${form.name} created`);
       }
       showModal=false;
-    } catch(e){ alert(e.message); }
+    } catch(e){ alert(`Could not save trip: ${e.message}`); }
   }
   async function remove(id){
     if(!confirm('Delete this trip?')) return;
