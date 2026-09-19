@@ -64,7 +64,7 @@ export async function loadNotifications(role) {
 
 export async function notify(text) {
   try {
-    const created = await apiPost('/notifications', { text, time: 'Just now' });
+    const created = await apiPost('/notifications', { text, time: 'Just now', kind: 'notification' });
     notifications.update((n) => [created, ...n]);
   } catch (e) {
     notifications.update((n) => [{ id: Date.now(), text, time: 'Just now' }, ...n]);

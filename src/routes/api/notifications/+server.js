@@ -8,8 +8,9 @@ export async function GET() {
 }
 
 export async function POST(event) {
-  const { text, time } = await event.request.json();
+  const { text, time, kind = 'notification' } = await event.request.json();
   const pool = getPool();
-  const [res] = await pool.query('INSERT INTO notifications (text, time) VALUES (?,?)', [text, time || 'Just now']);
-  return json({ id: res.insertId, text, time });
+  const safeKind = kind === 'reminder' ? 'reminder' : 'notification';
+  const [res] = await pool.query('INSERT INTO notifications (text, time, kind) VALUES (?,?,?)', [text, time || 'Just now', safeKind]);
+  return json({ id: res.insertId, text, time: time || 'Just now', kind: safeKind });
 }

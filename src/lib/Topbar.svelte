@@ -6,6 +6,7 @@
   export let onSearch = () => {};
   let query = '';
   let showNotif = false;
+  let showReminderList = false;
   let showReminder = false;
   let editingReminder = null;
   let showUserMenu = false;
@@ -41,7 +42,7 @@
   async function addReminder() {
     if (!reminderText.trim()) return;
     try {
-      const payload = { text: reminderText.trim(), time: reminderTime || 'Just now' };
+      const payload = { text: reminderText.trim(), time: reminderTime || 'Just now', kind: 'reminder' };
       if (editingReminder) {
         const updated = await apiPut(`/notifications/${editingReminder}`, payload);
         notifications.update((list) => list.map((item) => item.id === editingReminder ? updated : item));
@@ -49,7 +50,7 @@
         const reminder = await apiPost('/notifications', payload);
         notifications.update((list) => [reminder, ...list]);
       }
-      reminderText = ''; reminderTime = ''; showReminder = false;
+      reminderText = ''; reminderTime = ''; showReminder = false; showReminderList = false;
       editingReminder = null;
     } catch (e) {
       agentMsg = e.message;
@@ -61,6 +62,7 @@
     reminderText = reminder.text;
     reminderTime = reminder.time;
     showNotif = false;
+    showReminderList = false;
     showReminder = true;
   }
 
@@ -87,10 +89,11 @@
     {/if}
 
     <button class="btn btn-outline reminder-btn" on:click={() => (showReminder = true)}>＋ Reminder</button>
+    <button class="btn btn-outline reminder-list-btn" on:click={() => (showReminderList = !showReminderList)}>🗓 Reminders</button>
     <button class="icon-btn" on:click={() => (showNotif = !showNotif)} title="Notifications">
       🔔
-      {#if $notifications.length}
-        <span class="dot-badge">{$notifications.length}</span>
+      {#if $notifications.filter((item) => item.kind === 'notification').length}
+        <span class="dot-badge">{$notifications.filter((item) => item.kind === 'notification').length}</span>
       {/if}
     </button>
     <button class="icon-btn" on:click={goHome} title="Home">🏠</button>
@@ -110,13 +113,26 @@
   {#if showNotif}
     <div class="dropdown notif-dropdown">
       <div class="dropdown-title">Notifications</div>
-      {#each $notifications as n}
+      {#each $notifications.filter((item) => item.kind === 'notification') as n}
+        <div class="notif-item">
+          <div class="notif-content"><div>{n.text}</div><small>{n.time}</small></div>
+        </div>
+      {:else}
+        <div class="empty-state">No notifications</div>
+      {/each}
+    </div>
+  {/if}
+
+  {#if showReminderList}
+    <div class="dropdown reminder-dropdown">
+      <div class="dropdown-title">Reminders</div>
+      {#each $notifications.filter((item) => item.kind === 'reminder') as n}
         <div class="notif-item">
           <div class="notif-content"><div>{n.text}</div><small>{n.time}</small></div>
           <div class="notif-actions"><button class="btn-icon" title="Edit reminder" on:click={() => openReminderEditor(n)}>✏️</button><button class="btn-icon" title="Delete reminder" on:click={() => removeReminder(n.id)}>🗑️</button></div>
         </div>
       {:else}
-        <div class="empty-state">No notifications</div>
+        <div class="empty-state">No reminders</div>
       {/each}
     </div>
   {/if}
@@ -182,6 +198,7 @@
   border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12);min-width:260px;z-index:60;
 }
 .notif-dropdown{max-height:300px;overflow-y:auto;}
+.reminder-dropdown{max-height:300px;overflow-y:auto;right:110px;}
 .dropdown-title{padding:12px 16px;font-weight:700;border-bottom:1px solid var(--border);font-size:14px;}
 .notif-item{padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px;}
 .notif-item small{color:var(--text-dim);}
@@ -200,6 +217,7 @@
   .topbar-right{gap:6px;}
   .topbar-right > .btn-outline:not(.reminder-btn){display:none;}
   .reminder-btn{font-size:11px;padding:7px 8px;}
+  .reminder-list-btn{font-size:11px;padding:7px 8px;}
   .user-chip{padding:5px;}
   .user-chip-text{display:none;}
   .dropdown{min-width:220px;}

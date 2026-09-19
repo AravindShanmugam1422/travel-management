@@ -107,6 +107,7 @@ CREATE TABLE notifications (
   id INT AUTO_INCREMENT PRIMARY KEY,
   text VARCHAR(255),
   time VARCHAR(50),
+  kind VARCHAR(20) NOT NULL DEFAULT 'notification',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

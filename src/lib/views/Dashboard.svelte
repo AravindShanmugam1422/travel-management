@@ -121,7 +121,7 @@
     <div style="display:flex;flex-direction:column;gap:20px;">
       <div class="card">
         <h3 style="margin-top:0;">Upcoming Reminders</h3>
-        {#each $notifications.slice(0,4) as n}
+        {#each $notifications.filter((item) => item.kind === 'reminder').slice(0,4) as n}
           <div class="reminder-item">
             <div class="reminder-dot"></div>
             <div><div>{n.text}</div><small>{n.time}</small></div>
