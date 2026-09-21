@@ -10,7 +10,13 @@ function toApi(row) {
 export async function GET(event) {
   const pool = getPool();
   const scope = await accessScope(event, 'bookings.assigned_agent_id');
-  const [rows] = await pool.query(`SELECT bookings.*, users.name AS assigned_agent_name FROM bookings LEFT JOIN users ON users.id = bookings.assigned_agent_id${scope.clause} ORDER BY bookings.created_at DESC`, scope.params);
+  let rows;
+  try {
+    [rows] = await pool.query(`SELECT bookings.*, users.name AS assigned_agent_name FROM bookings LEFT JOIN users ON users.id = bookings.assigned_agent_id${scope.clause} ORDER BY bookings.created_at DESC`, scope.params);
+  } catch (error) {
+    if (!error.message?.includes('Unknown column')) throw error;
+    [rows] = await pool.query('SELECT * FROM bookings ORDER BY created_at DESC');
+  }
   return json(rows.map(toApi));
 }
 
@@ -20,9 +26,11 @@ export async function POST(event) {
   const userId = Number(event.request.headers.get('x-user-id'));
   const userRole = event.request.headers.get('x-user-role');
   const id = await nextId('bookings', 'BKG');
-  await pool.query(
-    'INSERT INTO bookings (id, client_name, trip_name, travel_date, status, amount, assigned_agent_id) VALUES (?,?,?,?,?,?,?)',
-    [id, body.clientName, body.tripName, body.travelDate || null, body.status, Number(body.amount || 0), userRole === 'agent' ? userId : body.assignedAgentId || null]
-  );
+  try {
+    await pool.query('INSERT INTO bookings (id, client_name, trip_name, travel_date, status, amount, assigned_agent_id) VALUES (?,?,?,?,?,?,?)', [id, body.clientName, body.tripName, body.travelDate || null, body.status, Number(body.amount || 0), userRole === 'agent' ? userId : body.assignedAgentId || null]);
+  } catch (error) {
+    if (!error.message?.includes('Unknown column')) throw error;
+    await pool.query('INSERT INTO bookings (id, client_name, trip_name, travel_date, status, amount) VALUES (?,?,?,?,?,?)', [id, body.clientName, body.tripName, body.travelDate || null, body.status, Number(body.amount || 0)]);
+  }
   return json({ id, ...body });
 }

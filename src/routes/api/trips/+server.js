@@ -16,7 +16,13 @@ function toApi(row) {
 export async function GET(event) {
   const pool = getPool();
   const scope = await accessScope(event, 'trips.assigned_agent_id');
-  const [rows] = await pool.query(`SELECT trips.*, users.name AS assigned_agent_name FROM trips LEFT JOIN users ON users.id = trips.assigned_agent_id${scope.clause} ORDER BY trips.created_at DESC`, scope.params);
+  let rows;
+  try {
+    [rows] = await pool.query(`SELECT trips.*, users.name AS assigned_agent_name FROM trips LEFT JOIN users ON users.id = trips.assigned_agent_id${scope.clause} ORDER BY trips.created_at DESC`, scope.params);
+  } catch (error) {
+    if (!error.message?.includes('Unknown column')) throw error;
+    [rows] = await pool.query('SELECT * FROM trips ORDER BY created_at DESC');
+  }
   return json(rows.map(toApi));
 }
 
@@ -26,9 +32,11 @@ export async function POST(event) {
   const userId = Number(event.request.headers.get('x-user-id'));
   const userRole = event.request.headers.get('x-user-role');
   const id = await nextId('trips', 'TR');
-  await pool.query(
-    'INSERT INTO trips (id, name, destination, start_date, end_date, status, assigned_agent_id) VALUES (?,?,?,?,?,?,?)',
-    [id, body.name, body.destination, body.startDate || null, body.endDate || null, body.status, userRole === 'agent' ? userId : body.assignedAgentId || null]
-  );
+  try {
+    await pool.query('INSERT INTO trips (id, name, destination, start_date, end_date, status, assigned_agent_id) VALUES (?,?,?,?,?,?,?)', [id, body.name, body.destination, body.startDate || null, body.endDate || null, body.status, userRole === 'agent' ? userId : body.assignedAgentId || null]);
+  } catch (error) {
+    if (!error.message?.includes('Unknown column')) throw error;
+    await pool.query('INSERT INTO trips (id, name, destination, start_date, end_date, status) VALUES (?,?,?,?,?,?)', [id, body.name, body.destination, body.startDate || null, body.endDate || null, body.status]);
+  }
   return json({ id, ...body });
 }

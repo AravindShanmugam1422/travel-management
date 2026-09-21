@@ -6,7 +6,13 @@ import { accessScope } from '$lib/server/access.js';
 export async function GET(event) {
 	const pool = getPool();
 	const scope = await accessScope(event, 'clients.assigned_agent_id');
-	const [rows] = await pool.query(`SELECT clients.*, users.name AS assigned_agent_name FROM clients LEFT JOIN users ON users.id = clients.assigned_agent_id${scope.clause} ORDER BY clients.created_at DESC`, scope.params);
+	let rows;
+	try {
+		[rows] = await pool.query(`SELECT clients.*, users.name AS assigned_agent_name FROM clients LEFT JOIN users ON users.id = clients.assigned_agent_id${scope.clause} ORDER BY clients.created_at DESC`, scope.params);
+	} catch (error) {
+		if (!error.message?.includes('Unknown column')) throw error;
+		[rows] = await pool.query('SELECT * FROM clients ORDER BY created_at DESC');
+	}
 	return json(rows.map((row) => ({ ...row, assignedAgentId: row.assigned_agent_id, assignedAgentName: row.assigned_agent_name })));
 }
 export const POST = (event) => crudCreate(event, 'clients', 'CL', ['name', 'email', 'phone', 'type', 'status', 'assigned_agent_id', 'passengers']);
