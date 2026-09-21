@@ -64,7 +64,7 @@
   }));
 </script>
 
-<div class="page dashboard-page">
+<div class="page">
   <div class="hero card">
     <div>
       <h1>{greeting}, {greetingName} 👋</h1>
@@ -194,10 +194,7 @@
 </div>
 
 <style>
-.dashboard-page{position:relative;isolation:isolate;}
-.dashboard-page::before{content:'';position:fixed;inset:0;z-index:-2;background:#cfe8e2 url('https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=2000') center/cover no-repeat;}
-.dashboard-page::after{content:'';position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(235,248,246,.88),rgba(244,247,251,.96) 72%);pointer-events:none;}
-.hero{background:linear-gradient(120deg,rgba(224,242,254,.82),rgba(240,253,250,.76)),url('https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover;min-height:132px;display:flex;align-items:center;}
+.hero{background:linear-gradient(120deg,#e0f2fe,#f0fdfa);}
 .hero h1{margin:0 0 4px;font-size:22px;}
 .hero p{margin:0;color:var(--text-dim);font-size:14px;}
 .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
