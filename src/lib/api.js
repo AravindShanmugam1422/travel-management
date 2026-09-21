@@ -15,7 +15,7 @@ async function handle(res) {
 }
 
 export async function apiGet(path) {
-  return handle(await fetch(BASE + path, { headers: headers() }));
+  return handle(await fetch(BASE + path, { headers: headers(), cache: 'no-store' }));
 }
 export async function apiPost(path, body) {
   return handle(await fetch(BASE + path, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers() }, body: JSON.stringify(body) }));
