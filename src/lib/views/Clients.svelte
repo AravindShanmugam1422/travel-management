@@ -1,6 +1,6 @@
 <script>
-  import { clients, bookings } from '../data.js';
-  import { goBack, goTo, notify } from '../stores.js';
+  import { clients, bookings, agents } from '../data.js';
+  import { goBack, goTo, notify, currentUser } from '../stores.js';
   import { statusClass } from '../badge.js';
   import Modal from '../Modal.svelte';
   import { apiPost, apiPut, apiDelete } from '../api.js';
@@ -10,7 +10,7 @@
   let filter = 'All';
   let showModal = false;
   let editing = null;
-  let form = { name:'', email:'', phone:'', type:'Regular', status:'Active' };
+  let form = { name:'', email:'', phone:'', type:'Regular', status:'Active', assignedAgentId:'', passengers:[] };
   let viewing = null;
   let documents = {};
 
@@ -36,25 +36,33 @@
 
   function openAdd() {
     editing = null;
-    form = { name:'', email:'', phone:'', type:'Regular', status:'Active' };
+    form = { name:'', email:'', phone:'', type:'Regular', status:'Active', assignedAgentId:'', passengers:[] };
     showModal = true;
   }
   function openEdit(c) {
     editing = c.id;
-    form = { ...c };
+    form = { ...c, passengers: parsePassengers(c.passengers) };
     showModal = true;
   }
   let saving = false;
+  function parsePassengers(value) {
+    if (Array.isArray(value)) return value;
+    try { return value ? JSON.parse(value) : []; } catch (e) { return []; }
+  }
+  function addPassenger() { form = { ...form, passengers: [...form.passengers, { name:'', relation:'', age:'' }] }; }
+  function removePassenger(index) { form = { ...form, passengers: form.passengers.filter((_, i) => i !== index) }; }
   async function save() {
     if (!form.name || saving) return;
+    if ($currentUser?.role === 'agent') form.assignedAgentId = $currentUser.id;
     saving = true;
     try {
       if (editing) {
-        await apiPut(`/clients/${editing}`, form);
-        clients.update((list) => list.map((c) => (c.id === editing ? { ...form, id: editing } : c)));
+        const payload = { ...form, assigned_agent_id: form.assignedAgentId || null, passengers: JSON.stringify(form.passengers || []) };
+        await apiPut(`/clients/${editing}`, payload);
+        clients.update((list) => list.map((c) => (c.id === editing ? { ...c, ...form, id: editing } : c)));
         notify(`Client ${form.name} updated`);
       } else {
-        const created = await apiPost('/clients', form);
+        const created = await apiPost('/clients', { ...form, assigned_agent_id: form.assignedAgentId || null, passengers: JSON.stringify(form.passengers || []) });
         clients.update((list) => [...list, created]);
         notify(`New client ${form.name} added`);
       }
@@ -163,6 +171,15 @@
         <select bind:value={form.status}><option>Active</option><option>Inactive</option></select>
       </div>
     </div>
+    {#if $currentUser?.role !== 'agent'}
+      <div class="form-row"><label>Assigned Agent</label>
+        <select bind:value={form.assignedAgentId}><option value="">Unassigned</option>{#each $agents as agent}<option value={agent.id}>{agent.name}</option>{/each}</select>
+      </div>
+    {/if}
+    <div class="passenger-head"><h3>Passengers</h3><button class="btn btn-outline" on:click={addPassenger}>+ Add Passenger</button></div>
+    {#each form.passengers as passenger, index}
+      <div class="passenger-row"><input placeholder="Full name" bind:value={passenger.name} /><input placeholder="Relation" bind:value={passenger.relation} /><input type="number" min="0" placeholder="Age" bind:value={passenger.age} /><button class="btn-icon" title="Remove passenger" on:click={() => removePassenger(index)}>🗑️</button></div>
+    {/each}
     <div class="form-actions">
       <button class="btn btn-outline" on:click={() => (showModal=false)}>Cancel</button>
       <button class="btn btn-primary" on:click={save}>{editing ? 'Save Changes' : 'Add Client'}</button>
@@ -179,6 +196,10 @@
     <div class="detail-row"><span>Phone</span><b>{viewing.phone}</b></div>
     <div class="detail-row"><span>Type</span><b>{viewing.type}</b></div>
     <div class="detail-row"><span>Status</span><b>{viewing.status}</b></div>
+    <h3 class="section-title">Passengers ({parsePassengers(viewing.passengers).length})</h3>
+    {#each parsePassengers(viewing.passengers) as passenger}
+      <div class="history-row"><span>{passenger.name}<small>{passenger.relation || 'Family / friend'}{passenger.age ? ` · ${passenger.age} years` : ''}</small></span></div>
+    {:else}<div class="empty-state compact">No additional passengers added.</div>{/each}
     <h3 class="section-title">Travel History</h3>
     {#each clientBookings as booking}
       <div class="history-row"><span>{booking.tripName}<small>{booking.travelDate}</small></span><b>{booking.status}<small>₹{Number(booking.amount).toLocaleString('en-IN')}</small></b></div>
@@ -204,4 +225,9 @@
 .upload-box input{display:none;}
 .document-row a{color:var(--teal);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .compact{padding:10px 0;font-size:12px;}
+.passenger-head{display:flex;align-items:center;justify-content:space-between;margin:18px 0 8px;}
+.passenger-head h3{font-size:14px;margin:0;}
+.passenger-row{display:grid;grid-template-columns:1.5fr 1fr .6fr auto;gap:7px;margin-bottom:8px;align-items:center;}
+.passenger-row input{min-width:0;padding:9px 10px;border:1px solid var(--border);border-radius:8px;}
+@media (max-width:640px){.passenger-row{grid-template-columns:1fr 1fr;}.passenger-row input:nth-child(3){grid-column:1;}}
 </style>

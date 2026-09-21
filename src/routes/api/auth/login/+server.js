@@ -10,5 +10,5 @@ export async function POST(event) {
     return json({ error: 'Invalid username, password, or role.' }, { status: 401 });
   }
   const u = rows[0];
-  return json({ id: u.id, name: u.name, username: u.username, role: u.role });
+  return json({ id: u.id, name: u.name, username: u.username, role: u.role, email: u.email || '', phone: u.phone || '', avatarUrl: u.avatar_url || '' });
 }

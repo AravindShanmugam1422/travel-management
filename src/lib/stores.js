@@ -18,6 +18,8 @@ function persisted(key, initial) {
 export const currentUser = persisted('tm_current_user', null);
 export const darkMode = persisted('tm_dark_mode', false);
 
+export const profile = writable(null);
+
 const rolePermissions = {
   agent: ['dashboard', 'clients', 'bookings', 'itinerary', 'expenses', 'service-review'],
   manager: ['dashboard', 'clients', 'trips', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review'],
@@ -26,6 +28,10 @@ const rolePermissions = {
 
 export function canAccess(role, page) {
   return rolePermissions[role]?.includes(page) || false;
+}
+
+export function roleLabel(role) {
+  return role === 'head_office' ? 'Head Office' : role === 'manager' ? 'Manager' : 'Agent';
 }
 
 export function toggleDarkMode() {
@@ -66,7 +72,7 @@ function showToast(text) {
   toasts.update((items) => [...items, { id, text }]);
   setTimeout(() => {
     toasts.update((items) => items.filter((item) => item.id !== id));
-  }, 3500);
+  }, 3000);
 }
 
 export async function loadNotifications(role) {

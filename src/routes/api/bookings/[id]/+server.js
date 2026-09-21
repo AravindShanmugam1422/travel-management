@@ -6,8 +6,8 @@ export async function PUT(event) {
   const body = await event.request.json();
   const pool = getPool();
   await pool.query(
-    'UPDATE bookings SET client_name=?, trip_name=?, travel_date=?, status=?, amount=? WHERE id=?',
-    [body.clientName, body.tripName, body.travelDate || null, body.status, Number(body.amount || 0), id]
+    'UPDATE bookings SET client_name=?, trip_name=?, travel_date=?, status=?, amount=?, assigned_agent_id=? WHERE id=?',
+    [body.clientName, body.tripName, body.travelDate || null, body.status, Number(body.amount || 0), body.assignedAgentId || null, id]
   );
   return json({ id, ...body });
 }

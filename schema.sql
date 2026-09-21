@@ -7,6 +7,10 @@ CREATE TABLE users (
   username VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   role ENUM('agent','manager','head_office') NOT NULL,
+  manager_id INT NULL,
+  phone VARCHAR(30),
+  email VARCHAR(150),
+  avatar_url VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -17,6 +21,8 @@ CREATE TABLE clients (
   phone VARCHAR(30),
   type ENUM('Regular','New','VIP') DEFAULT 'Regular',
   status ENUM('Active','Inactive') DEFAULT 'Active',
+  assigned_agent_id INT NULL,
+  passengers JSON NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -27,6 +33,7 @@ CREATE TABLE trips (
   start_date DATE NULL,
   end_date DATE NULL,
   status ENUM('Pending','Confirmed','Completed','Cancelled') DEFAULT 'Pending',
+  assigned_agent_id INT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -37,6 +44,7 @@ CREATE TABLE bookings (
   travel_date DATE NULL,
   status ENUM('Pending','Confirmed','Paid','Partial','Pending Payment') DEFAULT 'Pending',
   amount DECIMAL(12,2) DEFAULT 0,
+  assigned_agent_id INT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -1,6 +1,6 @@
 <script>
-  import { trips } from '../data.js';
-  import { goBack, goTo, notify } from '../stores.js';
+  import { trips, agents } from '../data.js';
+  import { goBack, goTo, notify, currentUser } from '../stores.js';
   import { statusClass } from '../badge.js';
   import Modal from '../Modal.svelte';
   import { apiPost, apiPut, apiDelete } from '../api.js';
@@ -8,7 +8,7 @@
   export let searchQuery = '';
   let filter = 'All';
   let showModal = false, editing = null, viewing = null;
-  let form = { name:'', destination:'', startDate:'', endDate:'', status:'Pending' };
+  let form = { name:'', destination:'', startDate:'', endDate:'', status:'Pending', assignedAgentId:'' };
 
   $: filters = ['All','Confirmed','Pending','Completed','Cancelled'].map(k => ({
     key:k, count: k==='All' ? $trips.length : $trips.filter(t=>t.status===k).length
@@ -21,11 +21,12 @@
     return matchFilter && matchSearch;
   });
 
-  function openAdd(){ editing=null; form={name:'',destination:'',startDate:'',endDate:'',status:'Pending'}; showModal=true; }
+  function openAdd(){ editing=null; form={name:'',destination:'',startDate:'',endDate:'',status:'Pending',assignedAgentId:$currentUser?.role === 'agent' ? $currentUser.id : ''}; showModal=true; }
   function openEdit(t){ editing=t.id; form={...t, startDate:(t.startDate || '').slice(0, 10), endDate:(t.endDate || '').slice(0, 10)}; showModal=true; }
   async function save(){
     if(!form.name) return;
     try {
+      if (currentUser && $currentUser?.role === 'agent') form.assignedAgentId = $currentUser.id;
       if(editing){
         await apiPut(`/trips/${editing}`, form);
         trips.update(list=>list.map(t=>t.id===editing?{...form,id:editing}:t));
@@ -98,6 +99,7 @@
     <div class="form-row"><label>Status</label>
       <select bind:value={form.status}><option>Pending</option><option>Confirmed</option><option>Completed</option><option>Cancelled</option></select>
     </div>
+    {#if $currentUser?.role !== 'agent'}<div class="form-row"><label>Assigned Agent</label><select bind:value={form.assignedAgentId}><option value="">Unassigned</option>{#each $agents as agent}<option value={agent.id}>{agent.name}</option>{/each}</select></div>{/if}
     <div class="form-actions">
       <button class="btn btn-outline" on:click={() => (showModal=false)}>Cancel</button>
       <button class="btn btn-primary" on:click={save}>{editing ? 'Save Changes' : 'Add Trip'}</button>

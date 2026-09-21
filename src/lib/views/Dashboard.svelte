@@ -1,12 +1,13 @@
 <script>
   import { onMount } from 'svelte';
-  import { clients, trips, bookings, expenses, destinations } from '../data.js';
+  import { clients, trips, bookings, expenses, destinations, agents, itineraries } from '../data.js';
   import { notifications, currentUser, goTo } from '../stores.js';
   import StatCard from '../StatCard.svelte';
   import Donut from '../Donut.svelte';
   import { statusClass } from '../badge.js';
 
   let currentHour = new Date().getHours();
+  let placeScope = 'state';
 
   onMount(() => {
     const clock = setInterval(() => {
@@ -53,6 +54,14 @@
     { label: 'Completed', value: $trips.filter(t=>t.status==='Completed').length, color: '#2563eb' },
     { label: 'Cancelled', value: $trips.filter(t=>t.status==='Cancelled').length, color: '#dc2626' }
   ];
+  $: visibleDestinations = destinations.filter((destination) => destination.scope === placeScope);
+  $: agentSummary = $agents.map((agent) => ({
+    ...agent,
+    clients: $clients.filter((item) => String(item.assignedAgentId || '') === String(agent.id)).length,
+    trips: $trips.filter((item) => String(item.assignedAgentId || '') === String(agent.id)).length,
+    bookings: $bookings.filter((item) => String(item.assignedAgentId || '') === String(agent.id)).length,
+    itineraries: $trips.filter((item) => String(item.assignedAgentId || '') === String(agent.id) && $itineraries[item.id]).length
+  }));
 </script>
 
 <div class="page">
@@ -60,6 +69,18 @@
     <div>
       <h1>{greeting}, {greetingName} 👋</h1>
       <p>Here's what's happening with your travel business today.</p>
+    </div>
+  </div>
+
+  <div class="places-band card">
+    <div><h2>Places &amp; Plans 🌿</h2><p>Explore popular destinations and open them in Maps.</p></div>
+    <select bind:value={placeScope} aria-label="Destination scope"><option value="state">State</option><option value="country">Country</option><option value="world">World</option></select>
+    <div class="places-grid">
+      {#each visibleDestinations as d}
+        <a class="place-tile" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.name + ', ' + d.region)}`} target="_blank" rel="noreferrer">
+          <span class="place-photo" style={`background:${d.img}`}></span><b>{d.name}</b><small>{d.region} · {d.trips} plans ↗</small>
+        </a>
+      {/each}
     </div>
   </div>
 
@@ -159,10 +180,21 @@
       {/if}
     </div>
   </div>
+
+  {#if $currentUser?.role === 'manager' || $currentUser?.role === 'head_office'}
+    <div class="card agent-summary">
+      <div class="card-head"><h3>Agent-wise Workspace</h3><span class="summary-note">Clients · Trips · Bookings · Itinerary</span></div>
+      <div class="agent-grid">
+        {#each agentSummary as agent}
+          <div class="agent-panel"><div class="agent-panel-title"><span class="agent-avatar">{agent.name.charAt(0)}</span><div><b>{agent.name}</b><small>{agent.username}</small></div></div><div class="agent-metrics"><span>👥 {agent.clients} Clients</span><span>✈️ {agent.trips} Trips</span><span>📅 {agent.bookings} Bookings</span><span>🗓️ {agent.itineraries} Itinerary</span></div></div>
+        {:else}<div class="empty-state compact">No agents created yet.</div>{/each}
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
-.hero{background:linear-gradient(120deg,#e0f2fe,#f0fdfa);}
+.hero{background:linear-gradient(120deg,rgba(224,242,254,.92),rgba(240,253,250,.88)),url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80') center/cover;min-height:132px;display:flex;align-items:center;}
 .hero h1{margin:0 0 4px;font-size:22px;}
 .hero p{margin:0;color:var(--text-dim);font-size:14px;}
 .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
@@ -186,4 +218,9 @@
 .agent-commission-value{font-size:28px;font-weight:800;color:var(--teal-dark);margin-top:4px;}
 .commission-note{color:var(--text-dim);font-size:12px;margin-top:3px;}
 .commission-icon{width:48px;height:48px;border-radius:14px;background:#ccfbf1;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.places-band{margin:20px 0;position:relative;overflow:hidden;background:linear-gradient(135deg,#f0fdf4,#ecfeff);}
+.places-band h2{margin:0 0 4px;font-size:19px;}.places-band p{margin:0;color:var(--text-dim);font-size:13px;}.places-band select{position:absolute;right:20px;top:20px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);}
+.places-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px;}.place-tile{display:flex;flex-direction:column;gap:4px;min-width:0;}.place-photo{height:72px;border-radius:10px;display:block;}.place-tile b{font-size:12px;}.place-tile small{font-size:10px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.agent-summary{margin-top:20px;}.summary-note{font-size:11px;color:var(--text-dim);}.agent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;}.agent-panel{border:1px solid var(--border);border-radius:10px;padding:13px;background:var(--bg);}.agent-panel-title{display:flex;align-items:center;gap:9px;}.agent-panel-title small{display:block;color:var(--text-dim);font-size:11px;margin-top:2px;}.agent-avatar{width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;}.agent-metrics{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px;color:var(--text-dim);font-size:11px;}
+@media (max-width:800px){.places-grid{grid-template-columns:repeat(2,1fr);}.places-band select{position:static;margin-top:12px;}.places-grid{margin-top:14px;}}
 </style>

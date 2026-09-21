@@ -1,5 +1,5 @@
 <script>
-  import { notifications, currentUser, darkMode, toggleDarkMode, goHome } from './stores.js';
+  import { notifications, currentUser, darkMode, toggleDarkMode, goHome, roleLabel, notify } from './stores.js';
   import { apiPost, apiPut, apiDelete } from './api.js';
   import { createEventDispatcher } from 'svelte';
 
@@ -14,6 +14,8 @@
   let agentName = '', agentUsername = '', agentPassword = '';
   let agentMsg = '';
   let reminderText = '', reminderTime = '';
+  let showProfile = false;
+  let profileForm = { name:'', email:'', phone:'' };
 
   const dispatch = createEventDispatcher();
 
@@ -23,6 +25,21 @@
 
   function logout() {
     currentUser.set(null);
+  }
+
+  function openProfile() {
+    profileForm = { name: $currentUser?.name || '', email: $currentUser?.email || '', phone: $currentUser?.phone || '' };
+    showUserMenu = false;
+    showProfile = true;
+  }
+
+  async function saveProfile() {
+    try {
+      const updated = await apiPut(`/users/${$currentUser.id}`, profileForm);
+      currentUser.set({ ...$currentUser, ...updated });
+      showProfile = false;
+      notify('Profile updated successfully ✨');
+    } catch (e) { agentMsg = e.message; }
   }
 
   async function addAgent() {
@@ -150,6 +167,7 @@
 
   {#if showUserMenu}
     <div class="dropdown user-dropdown">
+      <button class="dropdown-item" on:click={openProfile}>👤 Edit Profile</button>
       <button class="dropdown-item" on:click={logout}>Logout</button>
     </div>
   {/if}
@@ -170,6 +188,20 @@
         <button class="btn btn-outline" on:click={() => (showAddAgent = false)}>Close</button>
         <button class="btn btn-primary" on:click={addAgent}>Create Agent</button>
       </div>
+    </div>
+  </div>
+{/if}
+
+{#if showProfile}
+  <div class="modal-backdrop" on:click|self={() => (showProfile = false)}>
+    <div class="modal profile-modal">
+      <div class="modal-title"><span>👤 My Profile</span><button class="btn-icon" on:click={() => (showProfile = false)}>✕</button></div>
+      <div class="profile-badge">{$currentUser?.name?.charAt(0)}</div>
+      <div class="form-row"><label>Full Name</label><input bind:value={profileForm.name} /></div>
+      <div class="form-row"><label>Email</label><input type="email" bind:value={profileForm.email} /></div>
+      <div class="form-row"><label>Phone</label><input bind:value={profileForm.phone} /></div>
+      <div class="detail-row"><span>Role</span><b>{roleLabel($currentUser?.role)}</b></div>
+      <div class="form-actions"><button class="btn btn-outline" on:click={() => (showProfile = false)}>Cancel</button><button class="btn btn-primary" on:click={saveProfile}>Save Profile</button></div>
     </div>
   </div>
 {/if}
@@ -222,6 +254,8 @@
 .dropdown-item:hover{background:#f1f5f9;}
 .msg{font-size:13px;color:var(--teal-dark);margin-top:-6px;margin-bottom:10px;}
 .reminder-btn{white-space:nowrap;}
+.profile-badge{width:58px;height:58px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin:0 auto 16px;}
+.profile-modal .detail-row{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--border);font-size:13px;}
 
 @media (max-width:640px){
   .topbar{padding:10px 12px;gap:8px;}

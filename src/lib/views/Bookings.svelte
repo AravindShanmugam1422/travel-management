@@ -1,6 +1,6 @@
 <script>
-  import { bookings, clients, trips } from '../data.js';
-  import { goBack, goTo, notify } from '../stores.js';
+  import { bookings, clients, trips, agents } from '../data.js';
+  import { goBack, goTo, notify, currentUser } from '../stores.js';
   import { statusClass } from '../badge.js';
   import Modal from '../Modal.svelte';
   import { apiPost, apiPut, apiDelete } from '../api.js';
@@ -9,7 +9,7 @@
   export let searchQuery = '';
   let filter = 'All';
   let showModal=false, editing=null, viewing=null;
-  let form = { clientName:'', tripName:'', travelDate:'', status:'Pending', amount:0 };
+  let form = { clientName:'', tripName:'', travelDate:'', status:'Pending', amount:0, assignedAgentId:'' };
 
   $: filters = ['All','Confirmed','Pending','Paid','Partial','Pending Payment'].map(k => ({
     key:k, count: k==='All' ? $bookings.length : $bookings.filter(b=>b.status===k).length
@@ -22,11 +22,12 @@
     return matchFilter && matchSearch;
   });
 
-  function openAdd(){ editing=null; form={clientName:'',tripName:'',travelDate:'',status:'Pending',amount:0}; showModal=true; }
+  function openAdd(){ editing=null; form={clientName:'',tripName:'',travelDate:'',status:'Pending',amount:0,assignedAgentId:$currentUser?.role === 'agent' ? $currentUser.id : ''}; showModal=true; }
   function openEdit(b){ editing=b.id; form={...b}; showModal=true; }
   async function save(){
     if(!form.clientName || !form.tripName) return;
     try {
+      if ($currentUser?.role === 'agent') form.assignedAgentId = $currentUser.id;
       if(editing){ await apiPut(`/bookings/${editing}`, form); bookings.update(l=>l.map(b=>b.id===editing?{...form,id:editing}:b)); notify(`Booking ${editing} updated`); }
       else { const created = await apiPost('/bookings', form); bookings.update(l=>[...l, created]); notify(`New booking ${created.id} created`); }
       showModal=false;
@@ -120,6 +121,7 @@
         <option>Pending</option><option>Confirmed</option><option>Paid</option><option>Partial</option><option>Pending Payment</option>
       </select>
     </div>
+    {#if $currentUser?.role !== 'agent'}<div class="form-row"><label>Assigned Agent</label><select bind:value={form.assignedAgentId}><option value="">Unassigned</option>{#each $agents as agent}<option value={agent.id}>{agent.name}</option>{/each}</select></div>{/if}
     <div class="form-actions">
       <button class="btn btn-outline" on:click={() => (showModal=false)}>Cancel</button>
       <button class="btn btn-primary" on:click={save}>{editing ? 'Save Changes' : 'Create Booking'}</button>
