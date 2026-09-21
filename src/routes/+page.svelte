@@ -15,6 +15,7 @@
   import Payments from '$lib/views/Payments.svelte';
   import Expenses from '$lib/views/Expenses.svelte';
   import ServiceReview from '$lib/views/ServiceReview.svelte';
+  import Toasts from '$lib/Toasts.svelte';
 
   let searchQuery = '';
   let loading = false;
@@ -83,6 +84,8 @@
     </div>
   </div>
 {/if}
+
+<Toasts />
 
 <style>
 .app-shell{display:flex;min-height:100vh;}

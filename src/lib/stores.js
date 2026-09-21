@@ -57,12 +57,24 @@ export function goHome() {
 
 // ---------- notifications ----------
 export const notifications = writable([]);
+export const toasts = writable([]);
+
+let nextToastId = 1;
+
+function showToast(text) {
+  const id = nextToastId++;
+  toasts.update((items) => [...items, { id, text }]);
+  setTimeout(() => {
+    toasts.update((items) => items.filter((item) => item.id !== id));
+  }, 3500);
+}
 
 export async function loadNotifications(role) {
   try { notifications.set(await apiGet('/notifications')); } catch (e) { /* ignore */ }
 }
 
 export async function notify(text) {
+  showToast(text);
   try {
     const created = await apiPost('/notifications', { text, time: 'Just now', kind: 'notification' });
     notifications.update((n) => [created, ...n]);
