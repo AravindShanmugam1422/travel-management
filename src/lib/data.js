@@ -32,11 +32,12 @@ export const destinations = [
 ];
 
 export async function loadAllData() {
-  const [c, t, b, s, p, e, i, r, a] = await Promise.all([
+  const [c, t, b, s, p, e, i, r, agentResponse] = await Promise.all([
     apiGet('/clients'), apiGet('/trips'), apiGet('/bookings'), apiGet('/suppliers'),
     apiGet('/payments'), apiGet('/expenses'), apiGet('/itineraries'), apiGet('/reviews'), apiGet('/users?agents=1')
   ]);
   const user = get(currentUser);
+  const a = Array.isArray(agentResponse) ? agentResponse : [];
   agents.set(a);
   const visible = (rows) => user?.role !== 'manager' ? visibleToUser(rows, user) : rows.filter((row) => !row.assignedAgentId || a.some((agent) => String(agent.id) === String(row.assignedAgentId) && String(agent.managerId || '') === String(user.id)));
   const visibleTrips = visible(t);

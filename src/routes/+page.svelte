@@ -41,7 +41,8 @@
     try {
       await Promise.all([loadAllData(), loadNotifications($currentUser.role)]);
     } catch (e) {
-      loadError = 'Could not load data from the database. Check your .env connection settings.';
+      console.error('Travel Management data load failed:', e);
+      loadError = `Could not load data: ${e.message || 'Check your database connection and migrations.'}`;
     } finally {
       loading = false;
     }
