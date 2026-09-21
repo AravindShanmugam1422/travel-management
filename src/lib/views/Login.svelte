@@ -154,7 +154,6 @@
         <div class="switch">Already have an account? <button on:click={() => { mode='login'; error=''; info=''; }}>Login</button></div>
       {/if}
 
-      <div class="demo-hint">Demo login &mdash; Head Office: <b>aravind</b> / <b>admin123</b></div>
     </div>
   </div>
 </div>
