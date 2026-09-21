@@ -8,7 +8,14 @@ export async function GET(event) {
     return json({ error: 'Only Head Office can manage users.' }, { status: 403 });
   }
   if (url.searchParams.get('manage') === '1') {
-    const [users] = await pool.query("SELECT id, name, username, role, manager_id AS managerId, email, phone, created_at AS createdAt FROM users WHERE role IN ('manager','agent') ORDER BY role, name");
+    let users;
+    try {
+      [users] = await pool.query("SELECT id, name, username, role, manager_id AS managerId, email, phone, created_at AS createdAt FROM users WHERE role IN ('manager','agent') ORDER BY role, name");
+    } catch (error) {
+      if (!error.message?.includes('Unknown column')) throw error;
+      [users] = await pool.query("SELECT id, name, username, role, created_at AS createdAt FROM users WHERE role IN ('manager','agent') ORDER BY role, name");
+      users = users.map((user) => ({ ...user, managerId: null, email: '', phone: '' }));
+    }
     return json(users);
   }
   if (url.searchParams.get('agents') === '1') {
