@@ -14,3 +14,10 @@ export async function POST(event) {
   const [res] = await pool.query('INSERT INTO notifications (text, time, kind) VALUES (?,?,?)', [text, time || 'Just now', safeKind]);
   return json({ id: res.insertId, text, time: time || 'Just now', kind: safeKind });
 }
+
+export async function DELETE({ url }) {
+  const kind = url.searchParams.get('kind') || 'notification';
+  const pool = getPool();
+  await pool.query('DELETE FROM notifications WHERE kind=?', [kind === 'reminder' ? 'reminder' : 'notification']);
+  return json({ ok: true });
+}

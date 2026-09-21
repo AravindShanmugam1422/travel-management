@@ -75,6 +75,17 @@
       agentMsg = e.message;
     }
   }
+
+  async function clearNotifications() {
+    if (!confirm('Clear all notifications? Reminders will stay safe.')) return;
+    try {
+      await apiDelete('/notifications?kind=notification');
+      notifications.update((list) => list.filter((item) => item.kind !== 'notification'));
+      showNotif = false;
+    } catch (e) {
+      agentMsg = e.message;
+    }
+  }
 </script>
 
 <header class="topbar">
@@ -112,7 +123,7 @@
 
   {#if showNotif}
     <div class="dropdown notif-dropdown">
-      <div class="dropdown-title">Notifications</div>
+      <div class="dropdown-title"><span>Notifications</span><button class="clear-btn" on:click={clearNotifications}>Clear</button></div>
       {#each $notifications.filter((item) => item.kind === 'notification') as n}
         <div class="notif-item">
           <div class="notif-content"><div>{n.text}</div><small>{n.time}</small></div>
@@ -200,6 +211,8 @@
 .notif-dropdown{max-height:300px;overflow-y:auto;}
 .reminder-dropdown{max-height:300px;overflow-y:auto;right:110px;}
 .dropdown-title{padding:12px 16px;font-weight:700;border-bottom:1px solid var(--border);font-size:14px;}
+.dropdown-title{display:flex;align-items:center;justify-content:space-between;}
+.clear-btn{border:0;background:transparent;color:var(--red);font-size:12px;font-weight:700;cursor:pointer;}
 .notif-item{padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px;}
 .notif-item small{color:var(--text-dim);}
 .notif-item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
