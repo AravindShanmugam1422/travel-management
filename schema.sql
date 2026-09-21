@@ -62,6 +62,8 @@ CREATE TABLE payments (
 
 CREATE TABLE expenses (
   id VARCHAR(20) PRIMARY KEY,
+  client_name VARCHAR(150),
+  trip_name VARCHAR(150),
   purpose VARCHAR(150),
   method ENUM('Cash','Card','UPI','Bank Transfer') DEFAULT 'Cash',
   amount DECIMAL(12,2) DEFAULT 0,

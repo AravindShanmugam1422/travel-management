@@ -1,5 +1,5 @@
 <script>
-  import { expenses } from '../data.js';
+  import { expenses, clients, trips } from '../data.js';
   import { goBack, goTo, notify, currentUser } from '../stores.js';
   import { statusClass } from '../badge.js';
   import Modal from '../Modal.svelte';
@@ -8,7 +8,7 @@
   export let searchQuery = '';
   let filter = 'All';
   let showModal=false, editing=null, viewing=null;
-  let form = { purpose:'', method:'Cash', amount:0, date:'', status:'Unpaid', proof:'' };
+  let form = { clientName:'', tripName:'', purpose:'', method:'Cash', amount:0, date:'', status:'Unpaid', proof:'' };
 
   $: filters = ['All','Paid','Unpaid'].map(k => ({
     key:k, count: k==='All' ? $expenses.length : $expenses.filter(e=>e.status===k).length
@@ -25,7 +25,7 @@
     return matchFilter && matchSearch;
   });
 
-  function openAdd(){ editing=null; form={purpose:'',method:'Cash',amount:0,date:'',status:'Unpaid',proof:''}; showModal=true; }
+  function openAdd(){ editing=null; form={clientName:'',tripName:'',purpose:'',method:'Cash',amount:0,date:'',status:'Unpaid',proof:''}; showModal=true; }
   function openEdit(e){ editing=e.id; form={...e}; showModal=true; }
   async function save(){
     if(!form.purpose) return;
@@ -62,11 +62,11 @@
   <div class="card">
     <div class="table-wrap">
       <table>
-        <thead><tr><th>ID</th><th>Purpose</th><th>Method</th><th>Date</th><th>Status</th><th>Amount</th><th>Actions</th></tr></thead>
+        <thead><tr><th>ID</th><th>Client</th><th>Trip</th><th>Purpose</th><th>Method</th><th>Date</th><th>Status</th><th>Amount</th><th>Actions</th></tr></thead>
         <tbody>
           {#each filtered as e}
             <tr>
-              <td>{e.id}</td><td>{e.purpose}</td><td>{e.method}</td><td>{e.date}</td>
+              <td>{e.id}</td><td>{e.clientName || 'General'}</td><td>{e.tripName || 'General'}</td><td>{e.purpose}</td><td>{e.method}</td><td>{e.date}</td>
               <td><span class="badge {statusClass(e.status)}">{e.status}</span></td>
               <td>₹{Number(e.amount).toLocaleString('en-IN')}</td>
               <td>
@@ -76,7 +76,7 @@
               </td>
             </tr>
           {:else}
-            <tr><td colspan="7"><div class="empty-state">No expenses found.</div></td></tr>
+            <tr><td colspan="9"><div class="empty-state">No expenses found.</div></td></tr>
           {/each}
         </tbody>
       </table>
@@ -86,6 +86,10 @@
 
 {#if showModal}
   <Modal title={editing ? 'Edit Expense' : 'Add Expense'} on:close={() => (showModal=false)}>
+    <div class="two-col">
+      <div class="form-row"><label>Client</label><select bind:value={form.clientName}><option value="">General expense</option>{#each $clients as client}<option value={client.name}>{client.name}</option>{/each}</select></div>
+      <div class="form-row"><label>Trip</label><select bind:value={form.tripName}><option value="">General expense</option>{#each $trips as trip}<option value={trip.name}>{trip.name}</option>{/each}</select></div>
+    </div>
     <div class="form-row"><label>Purpose</label><input bind:value={form.purpose} placeholder="e.g. Fuel, Hotel Stay, Food" /></div>
     <div class="two-col">
       <div class="form-row"><label>Method</label>
@@ -110,6 +114,8 @@
 {#if viewing}
   <Modal title="Expense Details" on:close={() => (viewing=null)}>
     <div class="detail-row"><span>ID</span><b>{viewing.id}</b></div>
+    <div class="detail-row"><span>Client</span><b>{viewing.clientName || 'General'}</b></div>
+    <div class="detail-row"><span>Trip</span><b>{viewing.tripName || 'General'}</b></div>
     <div class="detail-row"><span>Purpose</span><b>{viewing.purpose}</b></div>
     <div class="detail-row"><span>Method</span><b>{viewing.method}</b></div>
     <div class="detail-row"><span>Date</span><b>{viewing.date}</b></div>
