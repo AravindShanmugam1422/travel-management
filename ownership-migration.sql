@@ -9,3 +9,13 @@ ALTER TABLE notifications ADD COLUMN kind VARCHAR(20) NOT NULL DEFAULT 'notifica
 CREATE INDEX idx_clients_agent ON clients (assigned_agent_id);
 CREATE INDEX idx_trips_agent ON trips (assigned_agent_id);
 CREATE INDEX idx_bookings_agent ON bookings (assigned_agent_id);
+
+CREATE TABLE IF NOT EXISTS password_reset_requests (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	user_id INT NOT NULL,
+	username VARCHAR(100) NOT NULL,
+	status ENUM('pending','approved','rejected','used') NOT NULL DEFAULT 'pending',
+	temporary_password_hash VARCHAR(255),
+	expires_at DATETIME,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

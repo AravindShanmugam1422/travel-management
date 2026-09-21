@@ -2,15 +2,20 @@
   import { currentUser } from '../stores.js';
   import { apiPost } from '../api.js';
 
-  let mode = 'login'; // 'login' | 'signup' | 'forgot'
+  let mode = 'login'; // 'login' | 'signup' | 'forgot' | 'complete-reset'
   let username = '', password = '', name = '', confirm = '', newPassword = '', resetConfirm = '';
+  let resetRequestId = '';
   let error = '', info = '', loading = false;
 
   async function doLogin() {
     error = ''; loading = true;
     try {
       const u = await apiPost('/auth/login', { username, password });
-      currentUser.set(u);
+      if (u.forcePasswordReset) {
+        resetRequestId = u.resetRequestId;
+        mode = 'complete-reset';
+        info = 'Temporary password accepted. Set a new password to continue.';
+      } else currentUser.set(u);
     } catch (e) {
       error = e.message;
     } finally {
@@ -43,15 +48,27 @@
 
   async function resetPassword() {
     error = ''; info = '';
-    if (!username || !newPassword || newPassword !== resetConfirm) {
-      error = 'Enter your username and matching new passwords.';
+    if (!username) {
+      error = 'Enter your username.';
       return;
     }
     loading = true;
     try {
-      await apiPost('/auth/reset-password', { username, newPassword });
-      info = 'Password reset successfully. You can now log in.';
-      password = ''; newPassword = ''; resetConfirm = ''; mode = 'login';
+      await apiPost('/auth/reset-request', { username });
+      info = 'Reset request sent to Admin. You can reset your password after approval.';
+      password = ''; newPassword = ''; resetConfirm = '';
+    } catch (e) { error = e.message; }
+    finally { loading = false; }
+  }
+
+  async function completeReset() {
+    error = ''; info = '';
+    if (!newPassword || newPassword !== resetConfirm) { error = 'Enter matching new passwords.'; return; }
+    loading = true;
+    try {
+      await apiPost('/auth/reset-password', { username, newPassword, confirmPassword: resetConfirm, requestId: resetRequestId });
+      info = 'Password changed successfully. Please log in again.';
+      password = ''; newPassword = ''; resetConfirm = ''; resetRequestId = ''; mode = 'login';
     } catch (e) { error = e.message; }
     finally { loading = false; }
   }
@@ -82,7 +99,10 @@
         <p class="sub">Login to your account</p>
       {:else if mode === 'forgot'}
         <h2>Reset Password 🔑</h2>
-        <p class="sub">Create a new password for your account</p>
+        <p class="sub">Ask Admin to approve your reset request</p>
+      {:else if mode === 'complete-reset'}
+        <h2>Set New Password 🔐</h2>
+        <p class="sub">Your temporary password was approved</p>
       {:else}
         <h2>Create Account</h2>
         <p class="sub">Sign up to get started</p>
@@ -99,15 +119,15 @@
         <label>Username</label>
         <input bind:value={username} placeholder="Enter your username" />
       </div>
-      <div class="form-row">
+      {#if mode !== 'forgot'}<div class="form-row">
         <label>Password</label>
-        {#if mode === 'forgot'}
+        {#if mode === 'complete-reset'}
           <input type="password" bind:value={newPassword} placeholder="Enter your new password" />
-        {:else}
+        {:else if mode !== 'forgot'}
           <input type="password" bind:value={password} placeholder="Enter your password" />
         {/if}
-      </div>
-      {#if mode === 'forgot'}
+      </div>{/if}
+      {#if mode === 'complete-reset'}
         <div class="form-row"><label>Confirm New Password</label><input type="password" bind:value={resetConfirm} placeholder="Confirm new password" /></div>
       {/if}
       {#if mode === 'signup'}
@@ -125,8 +145,10 @@
         <button class="forgot-link" on:click={() => { mode='forgot'; error=''; info=''; }}>Forgot password?</button>
         <div class="switch">Don't have an account? <button on:click={() => { mode='signup'; error=''; info=''; }}>Sign Up</button></div>
       {:else if mode === 'forgot'}
-        <button class="btn btn-primary full" on:click={resetPassword}>Reset Password</button>
+        <button class="btn btn-primary full" on:click={resetPassword}>Request Admin Approval</button>
         <div class="switch">Remembered it? <button on:click={() => { mode='login'; error=''; info=''; }}>Back to Login</button></div>
+      {:else if mode === 'complete-reset'}
+        <button class="btn btn-primary full" on:click={completeReset}>Save New Password</button>
       {:else}
         <button class="btn btn-primary full" on:click={doSignup}>Sign Up</button>
         <div class="switch">Already have an account? <button on:click={() => { mode='login'; error=''; info=''; }}>Login</button></div>
