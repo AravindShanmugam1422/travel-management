@@ -8,7 +8,13 @@ export async function PUT(event) {
 
   const pool = getPool();
   const safeKind = kind === 'notification' ? 'notification' : 'reminder';
-  const [result] = await pool.query('UPDATE notifications SET text=?, time=?, kind=? WHERE id=?', [text.trim(), time || 'Just now', safeKind, id]);
+  let result;
+  try {
+    [result] = await pool.query('UPDATE notifications SET text=?, time=?, kind=? WHERE id=?', [text.trim(), time || 'Just now', safeKind, id]);
+  } catch (error) {
+    if (!error.message?.includes("Unknown column 'kind'")) throw error;
+    [result] = await pool.query('UPDATE notifications SET text=?, time=? WHERE id=?', [text.trim(), time || 'Just now', id]);
+  }
   if (!result.affectedRows) return json({ error: 'Reminder not found.' }, { status: 404 });
   return json({ id: Number(id), text: text.trim(), time: time || 'Just now', kind: safeKind });
 }

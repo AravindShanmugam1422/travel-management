@@ -3,6 +3,7 @@ ALTER TABLE users ADD COLUMN manager_id INT NULL, ADD COLUMN phone VARCHAR(30), 
 ALTER TABLE clients ADD COLUMN assigned_agent_id INT NULL, ADD COLUMN passengers JSON NULL;
 ALTER TABLE trips ADD COLUMN assigned_agent_id INT NULL;
 ALTER TABLE bookings ADD COLUMN assigned_agent_id INT NULL;
+ALTER TABLE notifications ADD COLUMN kind VARCHAR(20) NOT NULL DEFAULT 'notification';
 
 -- Add foreign keys only after all existing user data has been checked.
 CREATE INDEX idx_clients_agent ON clients (assigned_agent_id);
