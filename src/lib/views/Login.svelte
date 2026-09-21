@@ -2,8 +2,8 @@
   import { currentUser } from '../stores.js';
   import { apiPost } from '../api.js';
 
-  let mode = 'login'; // 'login' | 'signup'
-  let username = '', password = '', name = '', confirm = '';
+  let mode = 'login'; // 'login' | 'signup' | 'forgot'
+  let username = '', password = '', name = '', confirm = '', newPassword = '', resetConfirm = '';
   let error = '', info = '', loading = false;
 
   async function doLogin() {
@@ -40,6 +40,21 @@
       loading = false;
     }
   }
+
+  async function resetPassword() {
+    error = ''; info = '';
+    if (!username || !newPassword || newPassword !== resetConfirm) {
+      error = 'Enter your username and matching new passwords.';
+      return;
+    }
+    loading = true;
+    try {
+      await apiPost('/auth/reset-password', { username, newPassword });
+      info = 'Password reset successfully. You can now log in.';
+      password = ''; newPassword = ''; resetConfirm = ''; mode = 'login';
+    } catch (e) { error = e.message; }
+    finally { loading = false; }
+  }
 </script>
 
 <div class="login-page">
@@ -65,6 +80,9 @@
       {#if mode === 'login'}
         <h2>Welcome Back</h2>
         <p class="sub">Login to your account</p>
+      {:else if mode === 'forgot'}
+        <h2>Reset Password 🔑</h2>
+        <p class="sub">Create a new password for your account</p>
       {:else}
         <h2>Create Account</h2>
         <p class="sub">Sign up to get started</p>
@@ -83,8 +101,15 @@
       </div>
       <div class="form-row">
         <label>Password</label>
-        <input type="password" bind:value={password} placeholder="Enter your password" />
+        {#if mode === 'forgot'}
+          <input type="password" bind:value={newPassword} placeholder="Enter your new password" />
+        {:else}
+          <input type="password" bind:value={password} placeholder="Enter your password" />
+        {/if}
       </div>
+      {#if mode === 'forgot'}
+        <div class="form-row"><label>Confirm New Password</label><input type="password" bind:value={resetConfirm} placeholder="Confirm new password" /></div>
+      {/if}
       {#if mode === 'signup'}
         <div class="form-row">
           <label>Confirm Password</label>
@@ -97,7 +122,11 @@
 
       {#if mode === 'login'}
         <button class="btn btn-primary full" on:click={doLogin}>Login</button>
+        <button class="forgot-link" on:click={() => { mode='forgot'; error=''; info=''; }}>Forgot password?</button>
         <div class="switch">Don't have an account? <button on:click={() => { mode='signup'; error=''; info=''; }}>Sign Up</button></div>
+      {:else if mode === 'forgot'}
+        <button class="btn btn-primary full" on:click={resetPassword}>Reset Password</button>
+        <div class="switch">Remembered it? <button on:click={() => { mode='login'; error=''; info=''; }}>Back to Login</button></div>
       {:else}
         <button class="btn btn-primary full" on:click={doSignup}>Sign Up</button>
         <div class="switch">Already have an account? <button on:click={() => { mode='login'; error=''; info=''; }}>Login</button></div>
@@ -142,5 +171,6 @@ h1{font-size:40px;line-height:1.15;margin:0 0 16px;font-weight:800;}
 .info{background:#ecfdf5;color:var(--teal-dark);font-size:12.5px;padding:9px 12px;border-radius:8px;margin-bottom:10px;}
 .hint{font-size:12px;color:var(--text-dim);margin:-6px 0 14px;}
 .demo-hint{margin-top:18px;font-size:11.5px;color:#94a3b8;text-align:center;}
+.forgot-link{display:block;margin:12px auto 0;background:none;border:0;color:var(--teal);font-size:12.5px;font-weight:700;cursor:pointer;}
 @media (max-width:860px){ .login-left{display:none;} }
 </style>

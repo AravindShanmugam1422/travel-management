@@ -15,6 +15,7 @@
   import Payments from '$lib/views/Payments.svelte';
   import Expenses from '$lib/views/Expenses.svelte';
   import ServiceReview from '$lib/views/ServiceReview.svelte';
+  import Users from '$lib/views/Users.svelte';
   import Toasts from '$lib/Toasts.svelte';
 
   let searchQuery = '';
@@ -79,6 +80,8 @@
           <Expenses {searchQuery} />
         {:else if $currentPage === 'service-review'}
           <ServiceReview />
+        {:else if $currentPage === 'users'}
+          <Users />
         {/if}
       </div>
     </div>

@@ -23,7 +23,7 @@ export const profile = writable(null);
 const rolePermissions = {
   agent: ['dashboard', 'clients', 'bookings', 'itinerary', 'expenses', 'service-review'],
   manager: ['dashboard', 'clients', 'trips', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review'],
-  head_office: ['dashboard', 'clients', 'trips', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review']
+  head_office: ['dashboard', 'clients', 'trips', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review', 'users']
 };
 
 export function canAccess(role, page) {

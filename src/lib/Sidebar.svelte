@@ -12,6 +12,7 @@
     { key: 'payments', label: 'Payments', icon: '💳' },
     { key: 'expenses', label: 'Expenses', icon: '🧾' },
     { key: 'service-review', label: 'Service Review', icon: '⭐' }
+    ,{ key: 'users', label: 'Users', icon: '🔐' }
   ];
 
   function roleLabel(r) {
