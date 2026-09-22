@@ -2,10 +2,9 @@
   import { currentPage, goTo, currentUser, canAccess } from './stores.js';
 
   const items = [
-    { key: 'passengers', label: 'Passengers', icon: '🧑‍✈️' },
-    { key: 'trip-map', label: 'Trip Map', icon: '🗺️' },
     { key: 'dashboard', label: 'Dashboard', icon: '📊' },
     { key: 'clients', label: 'Clients', icon: '👥' },
+    { key: 'passengers', label: 'Passengers', icon: '🧑‍✈️' },
     { key: 'trips', label: 'Trips', icon: '✈️' },
     { key: 'itinerary', label: 'Itinerary', icon: '🗓️' },
     { key: 'calendar', label: 'Calendar', icon: '📆' },
@@ -13,8 +12,9 @@
     { key: 'bookings', label: 'Bookings', icon: '📅' },
     { key: 'payments', label: 'Payments', icon: '💳' },
     { key: 'expenses', label: 'Expenses', icon: '🧾' },
-    { key: 'service-review', label: 'Service Review', icon: '⭐' }
-    ,{ key: 'users', label: 'Users', icon: '🔐' }
+    { key: 'service-review', label: 'Service Review', icon: '⭐' },
+    { key: 'trip-map', label: 'Trip Map', icon: '🗺️' },
+    { key: 'users', label: 'Users', icon: '🔐' }
   ];
 
   function roleLabel(r) {

@@ -21,7 +21,7 @@ export const darkMode = persisted('tm_dark_mode', false);
 export const profile = writable(null);
 
 const rolePermissions = {
-  agent: ['dashboard', 'clients', 'passengers', 'trip-map', 'bookings', 'itinerary', 'expenses', 'service-review'],
+  agent: ['dashboard', 'clients', 'passengers', 'trips', 'trip-map', 'bookings', 'itinerary', 'payments', 'expenses', 'service-review'],
   manager: ['dashboard', 'clients', 'passengers', 'trips', 'trip-map', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review'],
   head_office: ['dashboard', 'clients', 'passengers', 'trips', 'trip-map', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review', 'users']
 };
