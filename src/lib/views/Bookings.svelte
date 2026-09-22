@@ -1,6 +1,6 @@
 <script>
   import { bookings, clients, trips, agents } from '../data.js';
-  import { goBack, goTo, notify, currentUser } from '../stores.js';
+  import { goBack, goTo, notify, currentUser, navigationContext } from '../stores.js';
   import { statusClass } from '../badge.js';
   import Modal from '../Modal.svelte';
   import { apiPost, apiPut, apiDelete } from '../api.js';
@@ -23,6 +23,11 @@
   });
 
   function openAdd(){ editing=null; form={clientName:'',tripName:'',travelDate:'',status:'Pending',amount:0,assignedAgentId:$currentUser?.role === 'agent' ? $currentUser.id : ''}; showModal=true; }
+  $: if ($navigationContext.tripName && !showModal && !editing) {
+    openAdd();
+    form = { ...form, tripName: $navigationContext.tripName, clientName: $navigationContext.clientName || '' };
+    navigationContext.set({});
+  }
   function openEdit(b){ editing=b.id; form={...b}; showModal=true; }
   async function save(){
     if(!form.clientName || !form.tripName) return;
@@ -80,11 +85,10 @@
         <tbody>
           {#each filtered as b}
             <tr>
-              <td>{b.id}</td><td>{b.clientName}</td><td>{b.tripName}</td><td>{b.travelDate}</td>
+              <td>{b.id}</td><td><button class="detail-link" on:click={() => (viewing=b)}>{b.clientName}</button></td><td><button class="detail-link" on:click={() => (viewing=b)}>{b.tripName}</button></td><td>{b.travelDate}</td>
               <td><span class="badge {statusClass(b.status)}">{b.status}</span></td>
               <td>₹{Number(b.amount).toLocaleString('en-IN')}</td>
               <td>
-                <button class="btn-icon" on:click={() => (viewing=b)}>👁️</button>
                 <button class="btn-icon" on:click={() => openEdit(b)}>✏️</button>
                 <button class="btn-icon" on:click={() => remove(b.id)}>🗑️</button>
               </td>
@@ -147,4 +151,5 @@
 .detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;}
 .detail-row:last-child{border-bottom:none;}
 .contact-actions{display:flex;gap:8px;margin-bottom:12px;}
+.detail-link{background:none;border:0;padding:0;color:var(--teal);font:inherit;font-weight:700;text-align:left;}.detail-link:hover{text-decoration:underline;}
 </style>

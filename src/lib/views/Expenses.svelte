@@ -66,11 +66,10 @@
         <tbody>
           {#each filtered as e}
             <tr>
-              <td>{e.id}</td><td>{e.clientName || 'General'}</td><td>{e.tripName || 'General'}</td><td>{e.purpose}</td><td>{e.method}</td><td>{e.date}</td>
+              <td>{e.id}</td><td><button class="detail-link" on:click={() => (viewing=e)}>{e.clientName || 'General'}</button></td><td><button class="detail-link" on:click={() => (viewing=e)}>{e.tripName || 'General'}</button></td><td><button class="detail-link" on:click={() => (viewing=e)}>{e.purpose}</button></td><td>{e.method}</td><td>{e.date}</td>
               <td><span class="badge {statusClass(e.status)}">{e.status}</span></td>
               <td>₹{Number(e.amount).toLocaleString('en-IN')}</td>
               <td>
-                <button class="btn-icon" on:click={() => (viewing=e)}>👁️</button>
                 <button class="btn-icon" on:click={() => openEdit(e)}>✏️</button>
                 <button class="btn-icon" on:click={() => remove(e.id)}>🗑️</button>
               </td>
@@ -128,4 +127,5 @@
 <style>
 .detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;}
 .detail-row:last-child{border-bottom:none;}
+.detail-link{background:none;border:0;padding:0;color:var(--teal);font:inherit;font-weight:700;text-align:left;}.detail-link:hover{text-decoration:underline;}
 </style>

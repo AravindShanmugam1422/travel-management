@@ -21,9 +21,9 @@ export const darkMode = persisted('tm_dark_mode', false);
 export const profile = writable(null);
 
 const rolePermissions = {
-  agent: ['dashboard', 'clients', 'bookings', 'itinerary', 'expenses', 'service-review'],
-  manager: ['dashboard', 'clients', 'trips', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review'],
-  head_office: ['dashboard', 'clients', 'trips', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review', 'users']
+  agent: ['dashboard', 'clients', 'passengers', 'trip-map', 'bookings', 'itinerary', 'expenses', 'service-review'],
+  manager: ['dashboard', 'clients', 'passengers', 'trips', 'trip-map', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review'],
+  head_office: ['dashboard', 'clients', 'passengers', 'trips', 'trip-map', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review', 'users']
 };
 
 export function canAccess(role, page) {
@@ -41,12 +41,14 @@ export function toggleDarkMode() {
 // ---------- navigation ----------
 export const currentPage = writable('dashboard');
 export const pageHistory = writable([]);
+export const navigationContext = writable({});
 
-export function goTo(page) {
+export function goTo(page, context = {}) {
   pageHistory.update((h) => {
     currentPage.subscribe((c) => h.push(c))();
     return h;
   });
+  navigationContext.set(context);
   currentPage.set(page);
 }
 export function goBack() {
@@ -58,6 +60,7 @@ export function goBack() {
 }
 export function goHome() {
   pageHistory.set([]);
+  navigationContext.set({});
   currentPage.set('dashboard');
 }
 

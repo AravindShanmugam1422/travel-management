@@ -7,7 +7,9 @@
   import Topbar from '$lib/Topbar.svelte';
   import Dashboard from '$lib/views/Dashboard.svelte';
   import Clients from '$lib/views/Clients.svelte';
+  import Passengers from '$lib/views/Passengers.svelte';
   import Trips from '$lib/views/Trips.svelte';
+  import TripMap from '$lib/views/TripMap.svelte';
   import Itinerary from '$lib/views/Itinerary.svelte';
   import Calendar from '$lib/views/Calendar.svelte';
   import Suppliers from '$lib/views/Suppliers.svelte';
@@ -65,8 +67,12 @@
           <Dashboard />
         {:else if $currentPage === 'clients'}
           <Clients {searchQuery} />
+        {:else if $currentPage === 'passengers'}
+          <Passengers {searchQuery} />
         {:else if $currentPage === 'trips'}
           <Trips {searchQuery} />
+        {:else if $currentPage === 'trip-map'}
+          <TripMap />
         {:else if $currentPage === 'itinerary'}
           <Itinerary />
         {:else if $currentPage === 'calendar'}

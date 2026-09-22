@@ -85,17 +85,17 @@
   </div>
 
   <div class="stat-row" style="margin-top:20px;">
-    <StatCard label="Total Clients" value={$clients.length} icon="👥" color="#2563eb" bg="#dbeafe" />
-    <StatCard label="Total Trips" value={$trips.length} icon="✈️" color="#16a34a" bg="#dcfce7" />
-    <StatCard label="Total Bookings" value={$bookings.length} icon="📅" color="#7c3aed" bg="#f3e8ff" />
-    <StatCard label="Total Revenue" value={'₹' + totalRevenue.toLocaleString('en-IN')} icon="💰" color="#d97706" bg="#fef3c7" />
+    <StatCard label="Total Clients" value={$clients.length} icon="👥" color="#2563eb" bg="#dbeafe" page="clients" />
+    <StatCard label="Total Trips" value={$trips.length} icon="✈️" color="#16a34a" bg="#dcfce7" page="trips" />
+    <StatCard label="Total Bookings" value={$bookings.length} icon="📅" color="#7c3aed" bg="#f3e8ff" page="bookings" />
+    <StatCard label="Total Revenue" value={'₹' + totalRevenue.toLocaleString('en-IN')} icon="💰" color="#d97706" bg="#fef3c7" page="payments" />
   </div>
 
   <div class="stat-row">
-    <StatCard label="Confirmed Bookings" value={confirmedBookings} icon="✅" color="#15803d" bg="#dcfce7" />
-    <StatCard label="Pending Payment" value={'₹' + pendingPaymentAmount.toLocaleString('en-IN')} icon="⏳" color="#b45309" bg="#fef3c7" />
-    <StatCard label="Upcoming Bookings" value={upcomingBookings} icon="🗓️" color="#1d4ed8" bg="#dbeafe" />
-    <StatCard label="Booking Success" value={completionRate + '%'} icon="📈" color="#0f766e" bg="#ccfbf1" />
+    <StatCard label="Confirmed Bookings" value={confirmedBookings} icon="✅" color="#15803d" bg="#dcfce7" page="bookings" />
+    <StatCard label="Pending Payment" value={'₹' + pendingPaymentAmount.toLocaleString('en-IN')} icon="⏳" color="#b45309" bg="#fef3c7" page="payments" />
+    <StatCard label="Upcoming Bookings" value={upcomingBookings} icon="🗓️" color="#1d4ed8" bg="#dbeafe" page="bookings" />
+    <StatCard label="Booking Success" value={completionRate + '%'} icon="📈" color="#0f766e" bg="#ccfbf1" page="bookings" />
   </div>
 
   {#if isAgent}

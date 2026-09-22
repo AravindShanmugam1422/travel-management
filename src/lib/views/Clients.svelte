@@ -1,6 +1,6 @@
 <script>
   import { clients, bookings, agents } from '../data.js';
-  import { goBack, goTo, notify, currentUser } from '../stores.js';
+  import { goBack, goTo, notify, currentUser, navigationContext } from '../stores.js';
   import { statusClass } from '../badge.js';
   import Modal from '../Modal.svelte';
   import { apiPost, apiPut, apiDelete } from '../api.js';
@@ -84,6 +84,10 @@
   }
 
   $: clientBookings = viewing ? $bookings.filter((booking) => booking.clientName === viewing.name) : [];
+  $: if ($navigationContext.viewClientId && viewing?.id !== $navigationContext.viewClientId) {
+    viewing = $clients.find((client) => String(client.id) === String($navigationContext.viewClientId)) || null;
+    navigationContext.set({});
+  }
 
   function contactWhatsApp() {
     window.open(`https://wa.me/${(viewing.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Hello ${viewing.name}, this is Travel Management.`)}`, '_blank');
@@ -138,11 +142,10 @@
         <tbody>
           {#each filtered as c}
             <tr>
-              <td>{c.id}</td><td>{c.name}</td><td>{c.email}</td><td>{c.phone}</td>
+              <td>{c.id}</td><td><button class="detail-link" on:click={() => (viewing = c)}>{c.name}</button></td><td><button class="detail-link" on:click={() => (viewing = c)}>{c.email}</button></td><td><button class="detail-link" on:click={() => (viewing = c)}>{c.phone}</button></td>
               <td><span class="badge {statusClass(c.type)}">{c.type}</span></td>
               <td><span class="badge {statusClass(c.status)}">{c.status}</span></td>
               <td>
-                <button class="btn-icon" title="View" on:click={() => (viewing = c)}>👁️</button>
                 <button class="btn-icon" title="Edit" on:click={() => openEdit(c)}>✏️</button>
                 <button class="btn-icon" title="Delete" on:click={() => remove(c.id)}>🗑️</button>
               </td>
@@ -189,6 +192,7 @@
 
 {#if viewing}
   <Modal title="Client Details" on:close={() => (viewing=null)}>
+    <button class="btn btn-primary flow-button" on:click={() => goTo('trips', { clientName: viewing.name })}>Create trip for {viewing.name} →</button>
     <div class="contact-actions"><a class="btn btn-outline" href={`mailto:${viewing.email}`}>✉ Email</a><button class="btn btn-outline" on:click={contactWhatsApp}>💬 WhatsApp</button></div>
     <div class="detail-row"><span>ID</span><b>{viewing.id}</b></div>
     <div class="detail-row"><span>Name</span><b>{viewing.name}</b></div>
@@ -216,6 +220,7 @@
 .detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;}
 .detail-row:last-child{border-bottom:none;}
 .contact-actions{display:flex;gap:8px;margin-bottom:12px;}
+.flow-button{margin-bottom:12px;}
 .section-title{font-size:14px;margin:18px 0 8px;}
 .history-row,.document-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
 .history-row span,.history-row b{display:flex;flex-direction:column;gap:3px;}
@@ -229,5 +234,6 @@
 .passenger-head h3{font-size:14px;margin:0;}
 .passenger-row{display:grid;grid-template-columns:1.5fr 1fr .6fr auto;gap:7px;margin-bottom:8px;align-items:center;}
 .passenger-row input{min-width:0;padding:9px 10px;border:1px solid var(--border);border-radius:8px;}
+.detail-link{background:none;border:0;padding:0;color:var(--teal);font:inherit;font-weight:700;text-align:left;}.detail-link:hover{text-decoration:underline;}
 @media (max-width:640px){.passenger-row{grid-template-columns:1fr 1fr;}.passenger-row input:nth-child(3){grid-column:1;}}
 </style>

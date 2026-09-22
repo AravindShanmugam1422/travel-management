@@ -2,6 +2,8 @@
   import { currentPage, goTo, currentUser, canAccess } from './stores.js';
 
   const items = [
+    { key: 'passengers', label: 'Passengers', icon: '🧑‍✈️' },
+    { key: 'trip-map', label: 'Trip Map', icon: '🗺️' },
     { key: 'dashboard', label: 'Dashboard', icon: '📊' },
     { key: 'clients', label: 'Clients', icon: '👥' },
     { key: 'trips', label: 'Trips', icon: '✈️' },

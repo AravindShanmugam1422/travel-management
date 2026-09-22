@@ -1,6 +1,6 @@
 <script>
   import { trips, itineraries } from '../data.js';
-  import { goBack, goTo, notify } from '../stores.js';
+  import { goBack, goTo, notify, navigationContext } from '../stores.js';
   import { apiPost, apiDelete } from '../api.js';
   import { printPdf } from '../export.js';
 
@@ -11,6 +11,7 @@
   let itemTime = '', itemText = '';
 
   $: itin = $itineraries[selectedTrip];
+  $: if ($navigationContext.tripId && String(selectedTrip) !== String($navigationContext.tripId)) selectedTrip = $navigationContext.tripId;
 
   async function createItinerary() {
     const tripName = $trips.find(t=>t.id===selectedTrip)?.name || '';
@@ -86,7 +87,7 @@
     <div class="card">
       <div class="card-head">
         <h3 style="margin:0;">{itin.tripName} &mdash; Itinerary</h3>
-        <div class="header-actions"><button class="btn btn-outline" on:click={() => printPdf(`${itin.tripName} Itinerary`)}>🖨 PDF</button><button class="btn btn-primary" on:click={() => (showAddDay = true)}>+ New Day</button></div>
+        <div class="header-actions"><button class="btn btn-outline" on:click={() => printPdf(`${itin.tripName} Itinerary`)}>🖨 PDF</button><button class="btn btn-outline" on:click={() => goTo('bookings', { tripName: itin.tripName })}>Continue to booking →</button><button class="btn btn-primary" on:click={() => (showAddDay = true)}>+ New Day</button></div>
       </div>
 
       {#if showAddDay}

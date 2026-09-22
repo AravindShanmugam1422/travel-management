@@ -63,10 +63,9 @@
         <tbody>
           {#each filtered as s}
             <tr>
-              <td>{s.id}</td><td>{s.name}</td><td>{s.type}</td><td>{s.contact}</td>
+              <td>{s.id}</td><td><button class="detail-link" on:click={() => (viewing=s)}>{s.name}</button></td><td><button class="detail-link" on:click={() => (viewing=s)}>{s.type}</button></td><td><button class="detail-link" on:click={() => (viewing=s)}>{s.contact}</button></td>
               <td><span class="badge {statusClass(s.status)}">{s.status}</span></td>
               <td>
-                <button class="btn-icon" on:click={() => (viewing=s)}>👁️</button>
                 <button class="btn-icon" on:click={() => openEdit(s)}>✏️</button>
                 <button class="btn-icon" on:click={() => remove(s.id)}>🗑️</button>
               </td>
@@ -112,4 +111,5 @@
 <style>
 .detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;}
 .detail-row:last-child{border-bottom:none;}
+.detail-link{background:none;border:0;padding:0;color:var(--teal);font:inherit;font-weight:700;text-align:left;}.detail-link:hover{text-decoration:underline;}
 </style>

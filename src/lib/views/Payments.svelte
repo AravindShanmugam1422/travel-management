@@ -83,11 +83,10 @@
         <tbody>
           {#each filtered as p}
             <tr>
-              <td>{p.id}</td><td>{p.name}</td><td>{p.method}</td><td>{p.date}</td>
+              <td>{p.id}</td><td><button class="detail-link" on:click={() => (viewing=p)}>{p.name}</button></td><td><button class="detail-link" on:click={() => (viewing=p)}>{p.method}</button></td><td><button class="detail-link" on:click={() => (viewing=p)}>{p.date}</button></td>
               <td><span class="badge {statusClass(p.status)}">{p.status}</span></td>
               <td>₹{Number(p.amount).toLocaleString('en-IN')}</td>
               <td>
-                <button class="btn-icon" on:click={() => (viewing=p)}>👁️</button>
                 <button class="btn-icon" on:click={() => openEdit(p)}>✏️</button>
                 <button class="btn-icon" on:click={() => remove(p.id)}>🗑️</button>
               </td>
@@ -144,4 +143,5 @@
 <style>
 .detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;}
 .detail-row:last-child{border-bottom:none;}
+.detail-link{background:none;border:0;padding:0;color:var(--teal);font:inherit;font-weight:700;text-align:left;}.detail-link:hover{text-decoration:underline;}
 </style>

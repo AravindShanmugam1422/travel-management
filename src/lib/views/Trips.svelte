@@ -1,6 +1,6 @@
 <script>
   import { trips, agents } from '../data.js';
-  import { goBack, goTo, notify, currentUser } from '../stores.js';
+  import { goBack, goTo, notify, currentUser, navigationContext } from '../stores.js';
   import { statusClass } from '../badge.js';
   import Modal from '../Modal.svelte';
   import { apiPost, apiPut, apiDelete } from '../api.js';
@@ -23,6 +23,10 @@
 
   function openAdd(){ editing=null; form={name:'',destination:'',startDate:'',endDate:'',status:'Pending',assignedAgentId:$currentUser?.role === 'agent' ? $currentUser.id : ''}; showModal=true; }
   function openEdit(t){ editing=t.id; form={...t, startDate:(t.startDate || '').slice(0, 10), endDate:(t.endDate || '').slice(0, 10)}; showModal=true; }
+  $: if ($navigationContext.viewTripId && viewing?.id !== $navigationContext.viewTripId) {
+    viewing = $trips.find((trip) => String(trip.id) === String($navigationContext.viewTripId)) || null;
+    navigationContext.set({});
+  }
   async function save(){
     if(!form.name) return;
     try {
@@ -52,6 +56,7 @@
     <div><h1 class="page-title">Trips</h1><div class="page-sub">Access and create trips for your clients</div></div>
     <button class="btn btn-primary" on:click={openAdd}>+ Add Trip</button>
   </div>
+  {#if $navigationContext.clientName}<div class="flow-banner">Planning a trip for <b>{$navigationContext.clientName}</b>. After creating the trip, open it to continue with itinerary and booking.</div>{/if}
 
   <div class="stat-row">
     <div class="card stat-card"><div class="stat-label">Total Trips</div><div class="stat-value">{$trips.length}</div></div>
@@ -71,10 +76,9 @@
         <tbody>
           {#each filtered as t}
             <tr>
-              <td>{t.id}</td><td>{t.name}</td><td>{t.destination}</td><td>{t.startDate}</td><td>{t.endDate}</td>
+              <td>{t.id}</td><td><button class="detail-link" on:click={() => (viewing=t)}>{t.name}</button></td><td><button class="detail-link" on:click={() => (viewing=t)}>{t.destination}</button></td><td>{t.startDate}</td><td>{t.endDate}</td>
               <td><span class="badge {statusClass(t.status)}">{t.status}</span></td>
               <td>
-                <button class="btn-icon" on:click={() => (viewing=t)}>👁️</button>
                 <button class="btn-icon" on:click={() => openEdit(t)}>✏️</button>
                 <button class="btn-icon" on:click={() => remove(t.id)}>🗑️</button>
               </td>
@@ -115,10 +119,13 @@
     <div class="detail-row"><span>Start Date</span><b>{viewing.startDate}</b></div>
     <div class="detail-row"><span>End Date</span><b>{viewing.endDate}</b></div>
     <div class="detail-row"><span>Status</span><b>{viewing.status}</b></div>
+    <div class="flow-actions"><button class="btn btn-outline" on:click={() => goTo('trip-map')}>View trip map</button><button class="btn btn-primary" on:click={() => goTo('itinerary', { tripId: viewing.id })}>Continue to itinerary →</button></div>
   </Modal>
 {/if}
 
 <style>
 .detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;}
 .detail-row:last-child{border-bottom:none;}
+.flow-banner{margin:-8px 0 18px;padding:11px 14px;border-radius:9px;background:#ecfdf5;color:var(--teal-dark);font-size:13px;}
+.detail-link{background:none;border:0;padding:0;color:var(--teal);font:inherit;font-weight:700;text-align:left;}.detail-link:hover{text-decoration:underline;}.flow-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
 </style>
