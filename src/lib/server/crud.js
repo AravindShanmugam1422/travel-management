@@ -18,10 +18,20 @@ export async function crudCreate(event, table, prefix, fields) {
   const body = await event.request.json();
   const pool = getPool();
   const id = await nextId(table, prefix);
-  const cols = ['id', ...fields];
-  const vals = [id, ...fields.map((f) => (body[f] === undefined ? null : body[f]))];
-  const placeholders = cols.map(() => '?').join(',');
-  await pool.query(`INSERT INTO \`${table}\` (${cols.map(c=>`\`${c}\``).join(',')}) VALUES (${placeholders})`, vals);
+  let availableFields = [...fields];
+  while (true) {
+    const cols = ['id', ...availableFields];
+    const vals = [id, ...availableFields.map((f) => (body[f] === undefined ? null : body[f]))];
+    const placeholders = cols.map(() => '?').join(',');
+    try {
+      await pool.query(`INSERT INTO \`${table}\` (${cols.map(c=>`\`${c}\``).join(',')}) VALUES (${placeholders})`, vals);
+      break;
+    } catch (error) {
+      const missingField = error.message?.match(/Unknown column '([^']+)'/)?.[1];
+      if (!missingField || !availableFields.includes(missingField)) throw error;
+      availableFields = availableFields.filter((field) => field !== missingField);
+    }
+  }
   return json({ id, ...body });
 }
 
@@ -29,9 +39,19 @@ export async function crudUpdate(event, table, fields) {
   const id = event.params.id;
   const body = await event.request.json();
   const pool = getPool();
-  const setClause = fields.map((f) => `\`${f}\` = ?`).join(', ');
-  const vals = [...fields.map((f) => (body[f] === undefined ? null : body[f])), id];
-  await pool.query(`UPDATE \`${table}\` SET ${setClause} WHERE id = ?`, vals);
+  let availableFields = [...fields];
+  while (true) {
+    const setClause = availableFields.map((f) => `\`${f}\` = ?`).join(', ');
+    const vals = [...availableFields.map((f) => (body[f] === undefined ? null : body[f])), id];
+    try {
+      await pool.query(`UPDATE \`${table}\` SET ${setClause} WHERE id = ?`, vals);
+      break;
+    } catch (error) {
+      const missingField = error.message?.match(/Unknown column '([^']+)'/)?.[1];
+      if (!missingField || !availableFields.includes(missingField)) throw error;
+      availableFields = availableFields.filter((field) => field !== missingField);
+    }
+  }
   return json({ id, ...body });
 }
 
