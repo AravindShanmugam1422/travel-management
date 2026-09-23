@@ -1,16 +1,20 @@
 <script>
-  import { currentPage, goTo, currentUser, sidebarOpen } from './stores.js';
+  import { currentPage, goTo, currentUser, canAccess } from './stores.js';
 
   const items = [
     { key: 'dashboard', label: 'Dashboard', icon: '📊' },
     { key: 'clients', label: 'Clients', icon: '👥' },
+    { key: 'passengers', label: 'Passengers', icon: '🧑‍✈️' },
     { key: 'trips', label: 'Trips', icon: '✈️' },
     { key: 'itinerary', label: 'Itinerary', icon: '🗓️' },
+    { key: 'calendar', label: 'Calendar', icon: '📅' },
     { key: 'suppliers', label: 'Suppliers', icon: '🏢' },
-    { key: 'bookings', label: 'Bookings', icon: '📅' },
+    { key: 'bookings', label: 'Bookings', icon: '📋' },
     { key: 'payments', label: 'Payments', icon: '💳' },
     { key: 'expenses', label: 'Expenses', icon: '🧾' },
-    { key: 'service-review', label: 'Service Review', icon: '⭐' }
+    { key: 'service-review', label: 'Service Review', icon: '⭐' },
+    { key: 'trip-map', label: 'Trip Map', icon: '🗺️' },
+    { key: 'users', label: 'Users', icon: '🔐' }
   ];
 
   function roleLabel(r) {
@@ -18,33 +22,23 @@
     if (r === 'manager') return 'Manager';
     return 'Agent';
   }
-
-  function select(key) {
-    goTo(key);
-    sidebarOpen.set(false);
-  }
 </script>
 
-{#if $sidebarOpen}
-  <div class="sidebar-backdrop" on:click={() => sidebarOpen.set(false)}></div>
-{/if}
-
-<aside class="sidebar" class:open={$sidebarOpen}>
+<aside class="sidebar">
   <div class="brand">
     <div class="brand-icon">✈️</div>
     <div>
       <div class="brand-name">Travel Management</div>
       <div class="brand-sub">Plan &middot; Book &middot; Explore</div>
     </div>
-    <button class="sidebar-close" on:click={() => sidebarOpen.set(false)}>✕</button>
   </div>
 
   <nav class="nav">
-    {#each items as it}
+    {#each items.filter((item) => canAccess($currentUser?.role, item.key)) as it}
       <button
         class="nav-item"
         class:active={$currentPage === it.key}
-        on:click={() => select(it.key)}
+        on:click={() => goTo(it.key)}
       >
         <span class="nav-icon">{it.icon}</span>
         <span>{it.label}</span>
@@ -68,9 +62,7 @@
   width:250px;min-width:250px;height:100vh;background:var(--navy);
   display:flex;flex-direction:column;color:#fff;position:sticky;top:0;
 }
-.brand{display:flex;align-items:center;gap:10px;padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.08);position:relative;}
-.sidebar-close{display:none;position:absolute;top:14px;right:14px;background:none;border:none;color:#fff;font-size:18px;padding:6px;}
-.sidebar-backdrop{display:none;}
+.brand{display:flex;align-items:center;gap:10px;padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.08);}
 .brand-icon{width:34px;height:34px;background:var(--teal);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;}
 .brand-name{font-weight:700;font-size:15px;}
 .brand-sub{font-size:11px;color:#94a3b8;}
@@ -87,17 +79,13 @@
 .user-name{font-size:13px;font-weight:600;}
 .user-role{font-size:11px;color:#94a3b8;}
 
-@media (max-width: 860px){
-  .sidebar{
-    position:fixed;top:0;left:0;z-index:200;
-    transform:translateX(-100%);transition:transform .2s ease;
-    box-shadow:0 0 30px rgba(0,0,0,.25);
-  }
-  .sidebar.open{transform:translateX(0);}
-  .sidebar-close{display:block;}
-  .sidebar-backdrop{
-    display:block;position:fixed;inset:0;background:rgba(15,23,42,.45);
-    z-index:190;
-  }
+@media (max-width:640px){
+  .sidebar{width:64px;min-width:64px;}
+  .brand{justify-content:center;padding:16px 8px;}
+  .brand > div:last-child,.nav-item > span:last-child,.user-box > div:last-child{display:none;}
+  .nav{padding:12px 8px;}
+  .nav-item{justify-content:center;padding:11px 8px;}
+  .nav-icon{width:auto;font-size:18px;}
+  .user-box{justify-content:center;padding:12px 8px;}
 }
 </style>
