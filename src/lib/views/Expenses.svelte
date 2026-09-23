@@ -1,5 +1,5 @@
 <script>
-  import { expenses, clients, trips } from '../data.js';
+  import { expenses } from '../data.js';
   import { goBack, goTo, notify, currentUser } from '../stores.js';
   import { statusClass } from '../badge.js';
   import Modal from '../Modal.svelte';
@@ -8,7 +8,7 @@
   export let searchQuery = '';
   let filter = 'All';
   let showModal=false, editing=null, viewing=null;
-  let form = { clientName:'', tripName:'', purpose:'', method:'Cash', amount:0, date:'', status:'Unpaid', proof:'' };
+  let form = { purpose:'', method:'Cash', amount:0, date:'', status:'Unpaid', proof:'' };
 
   $: filters = ['All','Paid','Unpaid'].map(k => ({
     key:k, count: k==='All' ? $expenses.length : $expenses.filter(e=>e.status===k).length
@@ -25,7 +25,7 @@
     return matchFilter && matchSearch;
   });
 
-  function openAdd(){ editing=null; form={clientName:'',tripName:'',purpose:'',method:'Cash',amount:0,date:'',status:'Unpaid',proof:''}; showModal=true; }
+  function openAdd(){ editing=null; form={purpose:'',method:'Cash',amount:0,date:'',status:'Unpaid',proof:''}; showModal=true; }
   function openEdit(e){ editing=e.id; form={...e}; showModal=true; }
   async function save(){
     if(!form.purpose) return;
@@ -40,13 +40,36 @@
     try { await apiDelete(`/expenses/${id}`); expenses.update(l=>l.filter(e=>e.id!==id)); }
     catch(e){ alert(e.message); }
   }
+
+  function exportPdf() {
+    const rows = filtered.map(e => `<tr><td>${e.id}</td><td>${e.purpose}</td><td>${e.method}</td><td>${e.date}</td><td>${e.status}</td><td>₹${Number(e.amount).toLocaleString('en-IN')}</td></tr>`).join('');
+    const html = `<html><head><title>Expenses Report</title><style>
+      body{font-family:Arial,sans-serif;padding:24px;} h1{font-size:18px;}
+      table{width:100%;border-collapse:collapse;margin-top:16px;}
+      th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:13px;}
+      th{background:#0d9488;color:#fff;}
+      </style></head><body>
+      <h1>Travel Management &mdash; Expenses Report</h1>
+      <p>Generated: ${new Date().toLocaleString()}</p>
+      <table><thead><tr><th>ID</th><th>Purpose</th><th>Method</th><th>Date</th><th>Status</th><th>Amount</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      </body></html>`;
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    w.print();
+  }
 </script>
 
 <div class="page">
   <div class="crumbs"><button on:click={goBack}>← Back</button><span>/</span><button on:click={() => goTo('dashboard')}>Home</button></div>
   <div class="page-header">
     <div><h1 class="page-title">Expenses</h1><div class="page-sub">Track business expenses, purpose and proof</div></div>
-    <button class="btn btn-primary" on:click={openAdd}>+ Add Expense</button>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-outline" on:click={exportPdf}>Export PDF</button>
+      <button class="btn btn-primary" on:click={openAdd}>+ Add Expense</button>
+    </div>
   </div>
 
   <div class="stat-row">
@@ -62,20 +85,21 @@
   <div class="card">
     <div class="table-wrap">
       <table>
-        <thead><tr><th>ID</th><th>Client</th><th>Trip</th><th>Purpose</th><th>Method</th><th>Date</th><th>Status</th><th>Amount</th><th>Actions</th></tr></thead>
+        <thead><tr><th>ID</th><th>Purpose</th><th>Method</th><th>Date</th><th>Status</th><th>Amount</th><th>Actions</th></tr></thead>
         <tbody>
           {#each filtered as e}
             <tr>
-              <td>{e.id}</td><td><button class="detail-link" on:click={() => (viewing=e)}>{e.clientName || 'General'}</button></td><td><button class="detail-link" on:click={() => (viewing=e)}>{e.tripName || 'General'}</button></td><td><button class="detail-link" on:click={() => (viewing=e)}>{e.purpose}</button></td><td>{e.method}</td><td>{e.date}</td>
+              <td>{e.id}</td><td>{e.purpose}</td><td>{e.method}</td><td>{e.date}</td>
               <td><span class="badge {statusClass(e.status)}">{e.status}</span></td>
               <td>₹{Number(e.amount).toLocaleString('en-IN')}</td>
               <td>
+                <button class="btn-icon" on:click={() => (viewing=e)}>👁️</button>
                 <button class="btn-icon" on:click={() => openEdit(e)}>✏️</button>
                 <button class="btn-icon" on:click={() => remove(e.id)}>🗑️</button>
               </td>
             </tr>
           {:else}
-            <tr><td colspan="9"><div class="empty-state">No expenses found.</div></td></tr>
+            <tr><td colspan="7"><div class="empty-state">No expenses found.</div></td></tr>
           {/each}
         </tbody>
       </table>
@@ -85,10 +109,6 @@
 
 {#if showModal}
   <Modal title={editing ? 'Edit Expense' : 'Add Expense'} on:close={() => (showModal=false)}>
-    <div class="two-col">
-      <div class="form-row"><label>Client</label><select bind:value={form.clientName}><option value="">General expense</option>{#each $clients as client}<option value={client.name}>{client.name}</option>{/each}</select></div>
-      <div class="form-row"><label>Trip</label><select bind:value={form.tripName}><option value="">General expense</option>{#each $trips as trip}<option value={trip.name}>{trip.name}</option>{/each}</select></div>
-    </div>
     <div class="form-row"><label>Purpose</label><input bind:value={form.purpose} placeholder="e.g. Fuel, Hotel Stay, Food" /></div>
     <div class="two-col">
       <div class="form-row"><label>Method</label>
@@ -113,8 +133,6 @@
 {#if viewing}
   <Modal title="Expense Details" on:close={() => (viewing=null)}>
     <div class="detail-row"><span>ID</span><b>{viewing.id}</b></div>
-    <div class="detail-row"><span>Client</span><b>{viewing.clientName || 'General'}</b></div>
-    <div class="detail-row"><span>Trip</span><b>{viewing.tripName || 'General'}</b></div>
     <div class="detail-row"><span>Purpose</span><b>{viewing.purpose}</b></div>
     <div class="detail-row"><span>Method</span><b>{viewing.method}</b></div>
     <div class="detail-row"><span>Date</span><b>{viewing.date}</b></div>
@@ -127,5 +145,4 @@
 <style>
 .detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;}
 .detail-row:last-child{border-bottom:none;}
-.detail-link{background:none;border:0;padding:0;color:var(--teal);font:inherit;font-weight:700;text-align:left;}.detail-link:hover{text-decoration:underline;}
 </style>

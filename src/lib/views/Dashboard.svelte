@@ -1,13 +1,72 @@
 <script>
   import { onMount } from 'svelte';
-  import { clients, trips, bookings, expenses, destinations, agents, itineraries } from '../data.js';
+  import { clients, trips, bookings, expenses, destinations, destinationSpots, agents, itineraries } from '../data.js';
   import { notifications, currentUser, goTo } from '../stores.js';
   import StatCard from '../StatCard.svelte';
+  import Modal from '../Modal.svelte';
   import Donut from '../Donut.svelte';
   import { statusClass } from '../badge.js';
 
   let currentHour = new Date().getHours();
   let placeScope = 'state';
+  let galleryPlace = null;
+  let spotImages = {};
+  let loadedSpots = {};
+
+  // Offline-safe placeholder so a tile is never left blank.
+  function spotPlaceholder(name) {
+    const label = String(name).replace(/[<>&"']/g, '');
+    const svg =
+      `<svg xmlns='http://www.w3.org/2000/svg' width='640' height='480' viewBox='0 0 640 480'>` +
+      `<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#0f766e'/><stop offset='1' stop-color='#5eead4'/></linearGradient></defs>` +
+      `<rect width='640' height='480' fill='url(#g)'/>` +
+      `<text x='320' y='225' font-size='64' text-anchor='middle'>📍</text>` +
+      `<text x='320' y='305' font-family='Segoe UI, Arial, sans-serif' font-size='32' font-weight='700' fill='#ffffff' text-anchor='middle'>${label}</text>` +
+      `</svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  }
+
+  // Fallback chain: wiki photo -> picsum image -> inline SVG (never a blank tile).
+  function handleSpotError(spot, event) {
+    const img = event.currentTarget;
+    const current = spotImages[spot.name] || spot.img;
+    loadedSpots = { ...loadedSpots, [spot.name]: false };
+    if (current !== spot.img) {
+      spotImages = { ...spotImages, [spot.name]: spot.img };
+    } else if (!img.src.startsWith('data:')) {
+      spotImages = { ...spotImages, [spot.name]: spotPlaceholder(spot.name) };
+    }
+  }
+
+  async function loadSpotImages(place) {
+    const spots = destinationSpots[place.name] || [];
+    loadedSpots = {};
+    spotImages = Object.fromEntries(spots.map((spot) => [spot.name, spot.img]));
+    spots.forEach(async (spot) => {
+      try {
+        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(spot.wiki)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const thumb = data.thumbnail?.source;
+        const url = thumb ? thumb.replace(/\/\d+px-/, '/800px-') : data.originalimage?.source;
+        if (url && galleryPlace?.name === place.name) {
+          spotImages = { ...spotImages, [spot.name]: url };
+        }
+      } catch (e) {
+        /* keep fallback image */
+      }
+    });
+  }
+
+  function openGallery(destination) {
+    galleryPlace = destination;
+    loadedSpots = {};
+    loadSpotImages(destination);
+  }
+
+  $: galleryMapsUrl = galleryPlace
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(galleryPlace.name + ', ' + galleryPlace.region)}`
+    : '';
 
   onMount(() => {
     const clock = setInterval(() => {
@@ -64,7 +123,7 @@
   }));
 </script>
 
-<div class="page">
+<div class="page dash-bg">
   <div class="hero card">
     <div>
       <h1>{greeting}, {greetingName} 👋</h1>
@@ -77,9 +136,9 @@
     <select bind:value={placeScope} aria-label="Destination scope"><option value="state">State</option><option value="country">Country</option><option value="world">World</option></select>
     <div class="places-grid">
       {#each visibleDestinations as d}
-        <a class="place-tile" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.name + ', ' + d.region)}`} target="_blank" rel="noreferrer">
-          <span class="place-photo" style={`background:${d.img}`}></span><b>{d.name}</b><small>{d.region} · {d.trips} plans ↗</small>
-        </a>
+        <button type="button" class="place-tile" on:click={() => openGallery(d)}>
+          <span class="place-photo" style={`background:${d.img}`}></span><b>{d.name}</b><small>{d.region} · {d.trips} plans · {destinationSpots[d.name]?.length || 0} places 📷</small>
+        </button>
       {/each}
     </div>
   </div>
@@ -181,6 +240,32 @@
     </div>
   </div>
 
+  {#if galleryPlace}
+    <Modal title={`📍 ${galleryPlace.name} — Famous Tourist Places`} on:close={() => (galleryPlace = null)}>
+      <p class="spot-sub">{galleryPlace.region} · top {destinationSpots[galleryPlace.name]?.length || 0} places to visit</p>
+      <div class="spot-grid">
+        {#each destinationSpots[galleryPlace.name] || [] as spot}
+          <figure class="spot-tile">
+            <div class="spot-img" class:loaded={!!loadedSpots[spot.name]} style={`background:${galleryPlace.img}`}>
+              <img
+                src={spotImages[spot.name] || spot.img}
+                alt={spot.name}
+                loading="lazy"
+                on:load={() => (loadedSpots = { ...loadedSpots, [spot.name]: true })}
+                on:error={(e) => handleSpotError(spot, e)}
+              />
+            </div>
+            <figcaption>{spot.name}</figcaption>
+          </figure>
+        {/each}
+      </div>
+      <div class="form-actions">
+        <a class="btn btn-outline" href={galleryMapsUrl} target="_blank" rel="noreferrer">Open in Maps ↗</a>
+        <button class="btn btn-primary" on:click={() => (galleryPlace = null)}>Close</button>
+      </div>
+    </Modal>
+  {/if}
+
   {#if $currentUser?.role === 'manager' || $currentUser?.role === 'head_office'}
     <div class="card agent-summary">
       <div class="card-head"><h3>Agent-wise Workspace</h3><span class="summary-note">Clients · Trips · Bookings · Itinerary</span></div>
@@ -194,9 +279,30 @@
 </div>
 
 <style>
-.hero{background:linear-gradient(120deg,#e0f2fe,#f0fdfa);}
-.hero h1{margin:0 0 4px;font-size:22px;}
-.hero p{margin:0;color:var(--text-dim);font-size:14px;}
+.dash-bg{
+  min-height:calc(100vh - 67px);
+  background:
+    linear-gradient(rgba(15,23,42,0.30),rgba(15,23,42,0.45)),
+    url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1600&q=80') center/cover fixed no-repeat;
+}
+.dash-bg .card:not(.hero){
+  background:rgba(255,255,255,0.96);
+  box-shadow:0 6px 24px rgba(15,23,42,0.25);
+}
+html.dark-mode .dash-bg .card:not(.hero),
+html[data-theme=dark] .dash-bg .card:not(.hero){
+  background:rgba(23,32,51,0.96);
+}
+.hero{
+  position:relative;
+  min-height:130px;
+  display:flex;
+  align-items:center;
+  padding:26px 28px;
+  background:linear-gradient(rgba(15,23,42,0.42),rgba(15,23,42,0.55));
+}
+.hero h1{margin:0 0 4px;font-size:22px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,0.45);}
+.hero p{margin:0;color:rgba(255,255,255,0.92);font-size:14px;text-shadow:0 1px 4px rgba(0,0,0,0.4);}
 .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 .card-head h3{margin:0;font-size:15px;}
 .link{background:none;border:none;color:var(--teal);font-weight:600;font-size:12.5px;}
@@ -220,7 +326,18 @@
 .commission-icon{width:48px;height:48px;border-radius:14px;background:#ccfbf1;display:flex;align-items:center;justify-content:center;font-size:24px;}
 .places-band{margin:20px 0;position:relative;overflow:hidden;background:linear-gradient(135deg,#f0fdf4,#ecfeff);}
 .places-band h2{margin:0 0 4px;font-size:19px;}.places-band p{margin:0;color:var(--text-dim);font-size:13px;}.places-band select{position:absolute;right:20px;top:20px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);}
-.places-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px;}.place-tile{display:flex;flex-direction:column;gap:4px;min-width:0;}.place-photo{height:72px;border-radius:10px;display:block;}.place-tile b{font-size:12px;}.place-tile small{font-size:10px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.places-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px;}.place-tile{display:flex;flex-direction:column;gap:4px;min-width:0;padding:0;border:none;background:none;font:inherit;text-align:left;cursor:pointer;}.place-photo{height:72px;border-radius:10px;display:block;transition:transform .15s;}.place-tile:hover .place-photo{transform:scale(1.03);}.place-tile b{font-size:12px;}.place-tile small{font-size:10px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.spot-sub{margin:-6px 0 12px;color:var(--text-dim);font-size:12.5px;}
+.spot-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.spot-tile{margin:0;min-width:0;}
+.spot-img{position:relative;height:120px;border-radius:10px;overflow:hidden;background-size:cover;background-position:center;}
+.spot-img::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,rgba(255,255,255,0) 25%,rgba(255,255,255,0.45) 50%,rgba(255,255,255,0) 75%);background-size:200% 100%;animation:spot-shimmer 1.3s linear infinite;opacity:1;transition:opacity .3s ease;pointer-events:none;}
+.spot-img.loaded::after{opacity:0;}
+@keyframes spot-shimmer{from{background-position:150% 0;}to{background-position:-50% 0;}}
+.spot-img img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .35s ease;}
+.spot-img.loaded img{opacity:1;}
+.spot-tile figcaption{font-size:12.5px;font-weight:700;margin-top:6px;}
+@media (max-width:640px){.spot-grid{grid-template-columns:1fr;}}
 .agent-summary{margin-top:20px;}.summary-note{font-size:11px;color:var(--text-dim);}.agent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;}.agent-panel{border:1px solid var(--border);border-radius:10px;padding:13px;background:var(--bg);}.agent-panel-title{display:flex;align-items:center;gap:9px;}.agent-panel-title small{display:block;color:var(--text-dim);font-size:11px;margin-top:2px;}.agent-avatar{width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;}.agent-metrics{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px;color:var(--text-dim);font-size:11px;}
 @media (max-width:800px){.places-grid{grid-template-columns:repeat(2,1fr);}.places-band select{position:static;margin-top:12px;}.places-grid{margin-top:14px;}}
 </style>

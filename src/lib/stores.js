@@ -14,7 +14,6 @@ function persisted(key, initial) {
   return store;
 }
 
-// currentUser only stores {id,name,username,role} - no password client-side
 export const currentUser = persisted('tm_current_user', null);
 export const darkMode = persisted('tm_dark_mode', false);
 
@@ -38,7 +37,6 @@ export function toggleDarkMode() {
   darkMode.update((enabled) => !enabled);
 }
 
-// ---------- navigation ----------
 export const currentPage = writable('dashboard');
 export const pageHistory = writable([]);
 export const navigationContext = writable({});
@@ -64,19 +62,15 @@ export function goHome() {
   currentPage.set('dashboard');
 }
 
-// ---------- notifications ----------
-export const notifications = writable([]);
 export const toasts = writable([]);
 
-let nextToastId = 1;
-
-function showToast(text) {
-  const id = nextToastId++;
+export function showToast(text, duration = 3500) {
+  const id = Date.now() + Math.random();
   toasts.update((items) => [...items, { id, text }]);
-  setTimeout(() => {
-    toasts.update((items) => items.filter((item) => item.id !== id));
-  }, 3000);
+  setTimeout(() => toasts.update((items) => items.filter((item) => item.id !== id)), duration);
 }
+
+export const notifications = writable([]);
 
 export async function loadNotifications(role) {
   try { notifications.set(await apiGet('/notifications')); } catch (e) { /* ignore */ }
