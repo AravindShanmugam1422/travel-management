@@ -14,22 +14,44 @@ function persisted(key, initial) {
   return store;
 }
 
-// currentUser only stores {id,name,username,role} - no password client-side
 export const currentUser = persisted('tm_current_user', null);
+export const darkMode = persisted('tm_dark_mode', false);
 
-// ---------- navigation ----------
+export const profile = writable(null);
+
+const rolePermissions = {
+  agent: ['dashboard', 'clients', 'passengers', 'trips', 'trip-map', 'bookings', 'itinerary', 'payments', 'expenses', 'service-review'],
+  manager: ['dashboard', 'clients', 'passengers', 'trips', 'trip-map', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review'],
+  head_office: ['dashboard', 'clients', 'passengers', 'trips', 'trip-map', 'itinerary', 'calendar', 'suppliers', 'bookings', 'payments', 'expenses', 'service-review', 'users']
+};
+
+export function canAccess(role, page) {
+  return rolePermissions[role]?.includes(page) || false;
+}
+
+export function roleLabel(role) {
+  return role === 'head_office' ? 'Head Office' : role === 'manager' ? 'Manager' : 'Agent';
+}
+
+export function toggleDarkMode() {
+  darkMode.update((enabled) => !enabled);
+}
+
 export const currentPage = writable('dashboard');
 export const pageHistory = writable([]);
+export const navigationContext = writable({});
 
 // ---------- mobile sidebar ----------
 export const sidebarOpen = writable(false);
 
-export function goTo(page) {
+export function goTo(page, context = {}) {
   pageHistory.update((h) => {
     currentPage.subscribe((c) => h.push(c))();
     return h;
   });
+  navigationContext.set(context);
   currentPage.set(page);
+  sidebarOpen.set(false);
 }
 export function goBack() {
   pageHistory.update((h) => {
@@ -40,19 +62,29 @@ export function goBack() {
 }
 export function goHome() {
   pageHistory.set([]);
+  navigationContext.set({});
   currentPage.set('dashboard');
+  sidebarOpen.set(false);
 }
 
-// ---------- notifications ----------
+export const toasts = writable([]);
+
+export function showToast(text, duration = 3500) {
+  const id = Date.now() + Math.random();
+  toasts.update((items) => [...items, { id, text }]);
+  setTimeout(() => toasts.update((items) => items.filter((item) => item.id !== id)), duration);
+}
+
 export const notifications = writable([]);
 
-export async function loadNotifications() {
+export async function loadNotifications(role) {
   try { notifications.set(await apiGet('/notifications')); } catch (e) { /* ignore */ }
 }
 
 export async function notify(text) {
+  showToast(text);
   try {
-    const created = await apiPost('/notifications', { text, time: 'Just now' });
+    const created = await apiPost('/notifications', { text, time: 'Just now', kind: 'notification' });
     notifications.update((n) => [created, ...n]);
   } catch (e) {
     notifications.update((n) => [{ id: Date.now(), text, time: 'Just now' }, ...n]);
