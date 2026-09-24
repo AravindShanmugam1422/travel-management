@@ -281,17 +281,7 @@
 <style>
 .dash-bg{
   min-height:calc(100vh - 67px);
-  background:
-    linear-gradient(rgba(15,23,42,0.30),rgba(15,23,42,0.45)),
-    url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1600&q=80') center/cover fixed no-repeat;
-}
-.dash-bg .card:not(.hero){
-  background:rgba(255,255,255,0.96);
-  box-shadow:0 6px 24px rgba(15,23,42,0.25);
-}
-html.dark-mode .dash-bg .card:not(.hero),
-html[data-theme=dark] .dash-bg .card:not(.hero){
-  background:rgba(23,32,51,0.96);
+  background:var(--bg);
 }
 .hero{
   position:relative;
@@ -299,10 +289,11 @@ html[data-theme=dark] .dash-bg .card:not(.hero){
   display:flex;
   align-items:center;
   padding:26px 28px;
-  background:linear-gradient(rgba(15,23,42,0.42),rgba(15,23,42,0.55));
+  background:linear-gradient(120deg,var(--navy),var(--teal-dark));
+  border-radius:14px;
 }
-.hero h1{margin:0 0 4px;font-size:22px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,0.45);}
-.hero p{margin:0;color:rgba(255,255,255,0.92);font-size:14px;text-shadow:0 1px 4px rgba(0,0,0,0.4);}
+.hero h1{margin:0 0 4px;font-size:22px;color:#fff;}
+.hero p{margin:0;color:rgba(255,255,255,0.92);font-size:14px;}
 .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 .card-head h3{margin:0;font-size:15px;}
 .link{background:none;border:none;color:var(--teal);font-weight:600;font-size:12.5px;}
