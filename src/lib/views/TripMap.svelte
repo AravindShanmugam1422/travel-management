@@ -1,4 +1,4 @@
-<script>
+﻿<script>
   import { trips, itineraries } from '../data.js';
   import { goBack, goTo } from '../stores.js';
   import { statusClass } from '../badge.js';
@@ -11,6 +11,18 @@
 
   function routeUrl(trip) { return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trip.destination || trip.name)}`; }
   function dayItems(trip) { return $itineraries[trip.id]?.days?.flatMap((day) => day.items.map((item) => ({ ...item, day: day.label }))) || []; }
+
+  let copiedTripId = null;
+  async function copyShareLink(trip) {
+    const url = `${window.location.origin}/trip-summary/${trip.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      copiedTripId = trip.id;
+      setTimeout(() => { if (copiedTripId === trip.id) copiedTripId = null; }, 2000);
+    } catch (e) {
+      prompt('Copy this link:', url);
+    }
+  }
 
   function openStatusPicker(trip, item) {
     activeTripId = trip.id;
@@ -55,7 +67,7 @@
   <div class="trip-grid">
     {#each $trips as trip}
       <article class="card trip-route">
-        <div class="route-head"><div><h2>{trip.name}</h2><span class="badge {statusClass(trip.status)}">{trip.status}</span></div><a class="btn btn-outline" href={routeUrl(trip)} target="_blank" rel="noreferrer">Open map ↗</a></div>
+        <div class="route-head"><div><h2>{trip.name}</h2><span class="badge {statusClass(trip.status)}">{trip.status}</span></div><div class="route-head-actions"><button class="btn btn-outline" on:click={() => copyShareLink(trip)}>{copiedTripId === trip.id ? '✓ Copied' : '🔗 Copy'}</button><a class="btn btn-outline" href={routeUrl(trip)} target="_blank" rel="noreferrer">Open map ↗</a></div></div>
         <div class="flow">
           <div class="stop"><span class="marker start">1</span><div><small>START</small><b>{trip.startDate || 'Start date not set'}</b><p>Trip departure</p></div></div>
           <div class="line"></div>
@@ -101,6 +113,7 @@
 .map-note{margin-bottom:18px;background:linear-gradient(120deg,#ecfeff,#f0fdf4);color:var(--teal-dark);font-size:13px;}
 .trip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;}
 .route-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+.route-head-actions{display:flex;gap:8px;flex-wrap:wrap;}
 .route-head h2{font-size:17px;margin:0 0 7px;}
 .flow{margin:22px 0 15px;}
 .stop{display:flex;gap:11px;align-items:flex-start;}

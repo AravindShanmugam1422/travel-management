@@ -1,6 +1,5 @@
-import { writable } from 'svelte/store';
+﻿import { writable, get } from 'svelte/store';
 import { apiGet } from './api.js';
-import { get } from 'svelte/store';
 import { currentUser } from './stores.js';
 
 export const clients = writable([]);
@@ -18,6 +17,14 @@ export function visibleToUser(rows, user) {
   return rows.filter((row) => String(row.assignedAgentId || '') === String(user.id) || row.assignedAgentName === user.name);
 }
 
+function filterForRole(rows, user, agentList) {
+  if (!user) return rows;
+  if (user.role === 'manager') {
+    return rows.filter((row) => !row.assignedAgentId || agentList.some((agent) => String(agent.id) === String(row.assignedAgentId) && String(agent.managerId || '') === String(user.id)));
+  }
+  return visibleToUser(rows, user);
+}
+
 export const destinations = [
   { name: 'Ooty', scope:'state', region:'Tamil Nadu', trips:12, img:'linear-gradient(135deg,#166534,#86efac)' },
   { name: 'Kerala', scope:'state', region:'Kerala', trips:10, img:'linear-gradient(135deg,#0f766e,#99f6e4)' },
@@ -30,7 +37,6 @@ export const destinations = [
   { name: 'London', scope:'world', region:'UK', trips:6, img:'linear-gradient(135deg,#334155,#cbd5e1)' },
   { name: 'New York', scope:'world', region:'USA', trips:5, img:'linear-gradient(135deg,#4338ca,#a5b4fc)' }
 ];
-
 
 export const destinationSpots = {
   Ooty: [
@@ -105,18 +111,73 @@ export const destinationSpots = {
   ]
 };
 
-export async function loadAllData() {
-  const [c, t, b, s, p, e, i, r, agentResponse] = await Promise.all([
-    apiGet('/clients'), apiGet('/trips'), apiGet('/bookings'), apiGet('/suppliers'),
-    apiGet('/payments'), apiGet('/expenses'), apiGet('/itineraries'), apiGet('/reviews'), apiGet('/users?agents=1')
-  ]);
+async function fetchAgentsFresh() {
+  const res = await apiGet('/users?agents=1');
+  const list = Array.isArray(res) ? res : [];
+  agents.set(list);
+  return list;
+}
+
+export async function loadAgents() {
+  await fetchAgentsFresh();
+}
+
+export async function loadClients() {
   const user = get(currentUser);
-  const a = Array.isArray(agentResponse) ? agentResponse : [];
-  agents.set(a);
-  const visible = (rows) => user?.role !== 'manager' ? visibleToUser(rows, user) : rows.filter((row) => !row.assignedAgentId || a.some((agent) => String(agent.id) === String(row.assignedAgentId) && String(agent.managerId || '') === String(user.id)));
-  const visibleTrips = visible(t);
-  clients.set(visible(c)); trips.set(visibleTrips); bookings.set(visible(b)); suppliers.set(s);
-  payments.set(p); expenses.set(e);
+  const a = await fetchAgentsFresh();
+  const c = await apiGet('/clients');
+  clients.set(filterForRole(c, user, a));
+}
+
+export async function loadTrips() {
+  const user = get(currentUser);
+  const a = await fetchAgentsFresh();
+  const t = await apiGet('/trips');
+  trips.set(filterForRole(t, user, a));
+}
+
+export async function loadBookings() {
+  const user = get(currentUser);
+  const a = await fetchAgentsFresh();
+  const b = await apiGet('/bookings');
+  bookings.set(filterForRole(b, user, a));
+}
+
+export async function loadSuppliers() {
+  suppliers.set(await apiGet('/suppliers'));
+}
+
+export async function loadPayments() {
+  payments.set(await apiGet('/payments'));
+}
+
+export async function loadExpenses() {
+  expenses.set(await apiGet('/expenses'));
+}
+
+export async function loadReviews() {
+  reviews.set(await apiGet('/reviews'));
+}
+
+export async function loadItineraries() {
+  const user = get(currentUser);
+  const a = await fetchAgentsFresh();
+  const t = await apiGet('/trips');
+  const visibleTrips = filterForRole(t, user, a);
+  trips.set(visibleTrips);
+  const i = await apiGet('/itineraries');
   itineraries.set(Object.fromEntries(Object.entries(i).filter(([tripId]) => visibleTrips.some((trip) => String(trip.id) === String(tripId)))));
-  reviews.set(r);
+}
+
+export async function loadDashboardData() {
+  const user = get(currentUser);
+  const a = await fetchAgentsFresh();
+  const [c, t, b, e] = await Promise.all([apiGet('/clients'), apiGet('/trips'), apiGet('/bookings'), apiGet('/expenses')]);
+  const visibleTrips = filterForRole(t, user, a);
+  clients.set(filterForRole(c, user, a));
+  trips.set(visibleTrips);
+  bookings.set(filterForRole(b, user, a));
+  expenses.set(e);
+  const i = await apiGet('/itineraries');
+  itineraries.set(Object.fromEntries(Object.entries(i).filter(([tripId]) => visibleTrips.some((trip) => String(trip.id) === String(tripId)))));
 }

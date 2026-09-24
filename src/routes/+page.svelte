@@ -1,7 +1,10 @@
-<script>
+﻿<script>
   import '../app.css';
   import { currentUser, currentPage, darkMode, loadNotifications, canAccess, goHome } from '$lib/stores.js';
-  import { loadAllData } from '$lib/data.js';
+  import {
+    loadDashboardData, loadClients, loadTrips, loadItineraries, loadSuppliers,
+    loadBookings, loadPayments, loadExpenses, loadReviews, loadAgents
+  } from '$lib/data.js';
   import Login from '$lib/views/Login.svelte';
   import Sidebar from '$lib/Sidebar.svelte';
   import Topbar from '$lib/Topbar.svelte';
@@ -31,17 +34,63 @@
     document.documentElement.dataset.theme = $darkMode ? 'dark' : 'light';
   }
 
-  $: if ($currentUser) fetchAll();
   $: if ($currentUser && !canAccess($currentUser.role, $currentPage)) goHome();
 
-  let fetchedFor = null;
-  async function fetchAll() {
-    if (fetchedFor === $currentUser.username) return;
-    fetchedFor = $currentUser.username;
+  // Notifications are shown in the topbar regardless of tab, so load once per login.
+  let notifsLoadedFor = null;
+  $: if ($currentUser && notifsLoadedFor !== $currentUser.username) {
+    notifsLoadedFor = $currentUser.username;
+    loadNotifications($currentUser.role);
+  }
+
+  // Fetch fresh data for whichever tab is active, every time it is opened.
+  $: if ($currentUser && $currentPage) {
+    fetchForPage($currentPage);
+  }
+
+  async function fetchForPage(pageKey) {
     loading = true;
     loadError = '';
     try {
-      await Promise.all([loadAllData(), loadNotifications($currentUser.role)]);
+      switch (pageKey) {
+        case 'dashboard':
+          await loadDashboardData();
+          break;
+        case 'clients':
+        case 'passengers':
+          await loadClients();
+          break;
+        case 'trips':
+          await loadTrips();
+          break;
+        case 'trip-map':
+        case 'itinerary':
+          await loadItineraries();
+          break;
+        case 'calendar':
+          await Promise.all([loadTrips(), loadBookings()]);
+          break;
+        case 'suppliers':
+          await loadSuppliers();
+          break;
+        case 'bookings':
+          await Promise.all([loadBookings(), loadClients(), loadTrips()]);
+          break;
+        case 'payments':
+          await loadPayments();
+          break;
+        case 'expenses':
+          await loadExpenses();
+          break;
+        case 'service-review':
+          await loadReviews();
+          break;
+        case 'users':
+          await loadAgents();
+          break;
+        default:
+          break;
+      }
     } catch (e) {
       console.error('Travel Management data load failed:', e);
       loadError = `Could not load data: ${e.message || 'Check your database connection and migrations.'}`;
