@@ -20,7 +20,7 @@ export async function GET() {
   }
   for (const it of items) {
     const d = dayMap[it.day_id];
-    if (d) d.items.push({ id: it.id, time: it.time, text: it.text });
+    if (d) d.items.push({ id: it.id, time: it.time, text: it.text, status: it.status });
   }
   return json(result);
 }
