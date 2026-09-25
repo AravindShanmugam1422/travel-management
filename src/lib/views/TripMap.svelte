@@ -10,7 +10,14 @@
   let saving = false;
 
   function routeUrl(trip) { return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trip.destination || trip.name)}`; }
-  function dayItems(trip) { return $itineraries[trip.id]?.days?.flatMap((day) => day.items.map((item) => ({ ...item, day: day.label }))) || []; }
+
+  $: itemsByTrip = Object.fromEntries(
+    $trips.map((trip) => [
+      trip.id,
+      $itineraries[trip.id]?.days?.flatMap((day) => day.items.map((item) => ({ ...item, day: day.label }))) || []
+    ])
+  );
+  $: pendingByTrip = Object.fromEntries($trips.map((trip) => [trip.id, (itemsByTrip[trip.id] || []).some((item) => item.status === 'Pending')]));
 
   let copiedTripId = null;
   async function copyShareLink(trip) {
@@ -67,12 +74,12 @@
   <div class="trip-grid">
     {#each $trips as trip}
       <article class="card trip-route">
-        <div class="route-head"><div><h2>{trip.name}</h2><span class="badge {statusClass(trip.status)}">{trip.status}</span></div><div class="route-head-actions"><button class="btn btn-outline" on:click={() => copyShareLink(trip)}>{copiedTripId === trip.id ? '✓ Copied' : '🔗 Copy'}</button><a class="btn btn-outline" href={routeUrl(trip)} target="_blank" rel="noreferrer">Open map ↗</a></div></div>
+        <div class="route-head"><div><h2>{trip.name}</h2><span class="badge {statusClass(trip.status)}">{trip.status}</span>{#if pendingByTrip[trip.id]}<span class="badge badge-amber trip-pending-flag">⏳ Has pending activities</span>{/if}</div><div class="route-head-actions"><button class="btn btn-outline" on:click={() => copyShareLink(trip)}>{copiedTripId === trip.id ? '✓ Copied' : '🔗 Copy'}</button><a class="btn btn-outline" href={routeUrl(trip)} target="_blank" rel="noreferrer">Open map ↗</a></div></div>
         <div class="flow">
           <div class="stop"><span class="marker start">1</span><div><small>START</small><b>{trip.startDate || 'Start date not set'}</b><p>Trip departure</p></div></div>
           <div class="line"></div>
           <div class="stop"><span class="marker destination">2</span><div><small>DESTINATION</small><b>{trip.destination || 'Destination not set'}</b><p>{trip.name}</p></div></div>
-          {#each dayItems(trip) as item, index}
+          {#each itemsByTrip[trip.id] || [] as item, index}
             <div class="line"></div>
             <button type="button" class="stop stop-clickable" on:click={() => openStatusPicker(trip, item)}>
               <span class="marker activity" class:pending={item.status === 'Pending'}>{index + 3}</span>
@@ -114,6 +121,7 @@
 .trip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;}
 .route-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
 .route-head-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.trip-pending-flag{margin-left:8px;}
 .route-head h2{font-size:17px;margin:0 0 7px;}
 .flow{margin:22px 0 15px;}
 .stop{display:flex;gap:11px;align-items:flex-start;}
