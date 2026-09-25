@@ -74,7 +74,7 @@
   <div class="trip-grid">
     {#each $trips as trip}
       <article class="card trip-route">
-        <div class="route-head"><div><h2>{trip.name}</h2><span class="badge {statusClass(trip.status)}">{trip.status}</span>{#if pendingByTrip[trip.id]}<span class="badge badge-amber trip-pending-flag">⏳ Has pending activities</span>{/if}</div><div class="route-head-actions"><button class="btn btn-outline" on:click={() => copyShareLink(trip)}>{copiedTripId === trip.id ? '✓ Copied' : '🔗 Copy'}</button><a class="btn btn-outline" href={routeUrl(trip)} target="_blank" rel="noreferrer">Open map ↗</a></div></div>
+        <div class="route-head"><div><h2>{trip.name}</h2><span class="badge {statusClass(trip.status)}">{trip.status}</span></div><div class="route-head-actions"><button class="btn btn-outline" on:click={() => copyShareLink(trip)}>{copiedTripId === trip.id ? '✓ Copied' : '🔗 Copy'}</button><a class="btn btn-outline" href={routeUrl(trip)} target="_blank" rel="noreferrer">Open map ↗</a></div></div>
         <div class="flow">
           <div class="stop"><span class="marker start">1</span><div><small>START</small><b>{trip.startDate || 'Start date not set'}</b><p>Trip departure</p></div></div>
           <div class="line"></div>
@@ -97,6 +97,16 @@
           {/each}
           <div class="line"></div><div class="stop"><span class="marker end">✓</span><div><small>END</small><b>{trip.endDate || 'End date not set'}</b><p>Return / trip completion</p></div></div>
         </div>
+        {#if pendingByTrip[trip.id]}
+          <div class="pending-summary">
+            <b>⏳ Pending activities</b>
+            <ul>
+              {#each (itemsByTrip[trip.id] || []).filter((item) => item.status === 'Pending') as item}
+                <li>{item.text}{item.time ? ` · ${item.time}` : ''}</li>
+              {/each}
+            </ul>
+          </div>
+        {/if}
         <div class="route-actions"><button class="btn btn-outline" on:click={() => goTo('trips', { viewTripId: trip.id })}>Trip details</button><button class="btn btn-primary" on:click={() => goTo('itinerary', { tripId: trip.id })}>Manage itinerary</button></div>
       </article>
     {:else}<div class="card empty-state">No trips available to map yet.</div>{/each}
@@ -122,6 +132,10 @@
 .route-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
 .route-head-actions{display:flex;gap:8px;flex-wrap:wrap;}
 .trip-pending-flag{margin-left:8px;}
+.pending-summary{margin:0 0 14px;padding:10px 12px;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;font-size:12.5px;color:#92400e;}
+.pending-summary b{display:block;margin-bottom:4px;font-size:12.5px;}
+.pending-summary ul{margin:0;padding-left:18px;}
+.pending-summary li{margin:2px 0;}
 .route-head h2{font-size:17px;margin:0 0 7px;}
 .flow{margin:22px 0 15px;}
 .stop{display:flex;gap:11px;align-items:flex-start;}
