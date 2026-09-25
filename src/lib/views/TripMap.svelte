@@ -128,7 +128,8 @@
 
 <style>
 .map-note{margin-bottom:18px;background:linear-gradient(120deg,#ecfeff,#f0fdf4);color:var(--teal-dark);font-size:13px;}
-.trip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;}
+.trip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;align-items:start;}
+.trip-route{display:flex;flex-direction:column;height:560px;}
 .route-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
 .route-head-actions{display:flex;gap:8px;flex-wrap:wrap;}
 .trip-pending-flag{margin-left:8px;}
@@ -137,7 +138,7 @@
 .pending-summary ul{margin:0;padding-left:18px;}
 .pending-summary li{margin:2px 0;}
 .route-head h2{font-size:17px;margin:0 0 7px;}
-.flow{margin:22px 0 15px;}
+.flow{margin:22px 0 15px;flex:1;overflow-y:auto;padding-right:4px;}
 .stop{display:flex;gap:11px;align-items:flex-start;}
 .stop-clickable{width:100%;background:none;border:none;padding:0;text-align:left;font:inherit;cursor:pointer;border-radius:8px;}
 .stop-clickable:hover{background:var(--bg);}
