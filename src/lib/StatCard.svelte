@@ -17,7 +17,16 @@
 </button>
 
 <style>
-.stat-card{width:100%;text-align:left;border:1px solid var(--border);}
-.clickable{cursor:pointer;transition:transform .15s,box-shadow .15s;}
-.clickable:hover{transform:translateY(-2px);box-shadow:0 7px 16px rgba(15,23,42,.10);border-color:var(--teal);}
+.stat-card{
+  width:100%;text-align:left;border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:20px 22px;
+  background:var(--card);box-shadow:var(--shadow-sm);
+  transition:all .22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.clickable{cursor:pointer;}
+.clickable:hover{
+  transform:translateY(-3px);
+  box-shadow:var(--shadow-md);
+  border-color:var(--teal);
+}
 </style>

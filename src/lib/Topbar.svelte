@@ -236,47 +236,79 @@
 <style>
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:14px 26px;background:var(--card);border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:50;gap:16px;
+  padding:14px 28px;background:rgba(255,255,255,0.85);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;gap:18px;
+  transition:background .25s ease, border-color .25s ease;
+}
+:global([data-theme="dark"]) .topbar{
+  background:rgba(17,26,40,0.85);
 }
 .topbar-right{display:flex;align-items:center;gap:12px;position:relative;}
 .dropdown-wrap{position:relative;display:flex;align-items:center;}
 .icon-btn{
-  background:none;border:1px solid var(--border);width:38px;height:38px;border-radius:9px;
-  font-size:16px;position:relative;display:flex;align-items:center;justify-content:center;
+  background:var(--card);border:1px solid var(--border);width:38px;height:38px;
+  border-radius:10px;font-size:16px;position:relative;display:flex;
+  align-items:center;justify-content:center;transition:all .18s ease;box-shadow:var(--shadow-xs);
 }
-.icon-btn:hover{background:#f1f5f9;}
+.icon-btn:hover{background:var(--bg);border-color:var(--teal);transform:translateY(-1px);}
 .dot-badge{
-  position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;
-  font-size:10px;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;
+  position:absolute;top:-4px;right:-4px;
+  background:linear-gradient(135deg, #ef4444, #dc2626);color:#fff;
+  font-size:10px;font-weight:800;border-radius:50%;width:16px;height:16px;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(239,68,68,0.4);
 }
-.user-chip{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:6px 10px;}
-.avatar-sm{width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
+.user-chip{
+  display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:6px 12px;box-shadow:var(--shadow-xs);transition:all .18s ease;
+}
+.user-chip:hover{border-color:var(--teal);box-shadow:var(--shadow-sm);}
+.avatar-sm{
+  width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg, #0d9488, #2563eb);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;
+}
 .user-chip-text{display:flex;flex-direction:column;align-items:flex-start;font-size:12px;line-height:1.3;}
 .dropdown{
-  position:absolute;top:52px;right:0;background:var(--card);border:1px solid var(--border);
-  border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.12);min-width:260px;z-index:60;
+  position:absolute;top:54px;right:0;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);min-width:280px;z-index:60;
+  animation:dropdown-pop .2s ease-out;overflow:hidden;
 }
-.notif-dropdown{max-height:300px;overflow-y:auto;}
-.reminder-dropdown{max-height:300px;overflow-y:auto;}
-.dropdown-title{padding:12px 16px;font-weight:700;border-bottom:1px solid var(--border);font-size:14px;}
-.dropdown-title{display:flex;align-items:center;justify-content:space-between;}
+@keyframes dropdown-pop{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.notif-dropdown{max-height:320px;overflow-y:auto;}
+.reminder-dropdown{max-height:320px;overflow-y:auto;}
+.dropdown-title{
+  padding:14px 18px;font-weight:700;border-bottom:1px solid var(--border);font-size:14px;
+  display:flex;align-items:center;justify-content:space-between;
+}
 .clear-btn{border:0;background:transparent;color:var(--red);font-size:12px;font-weight:700;cursor:pointer;}
-.notif-item{padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px;}
-.notif-item small{color:var(--text-dim);}
-.notif-item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.notif-item{
+  padding:12px 18px;border-bottom:1px solid var(--border);font-size:13px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+  transition:background .15s ease;
+}
+.notif-item:hover{background:var(--bg);}
+.notif-item small{color:var(--text-dim);font-size:11px;margin-top:2px;}
 .notif-content{min-width:0;flex:1;}
-.notif-actions{display:flex;gap:2px;flex-shrink:0;}
-.dropdown-item{width:100%;text-align:left;padding:12px 16px;background:none;border:none;font-size:14px;}
-.dropdown-item:hover{background:#f1f5f9;}
+.notif-actions{display:flex;gap:4px;flex-shrink:0;}
+.dropdown-item{
+  width:100%;text-align:left;padding:12px 18px;background:none;border:none;font-size:13.5px;
+  color:var(--text);font-weight:500;transition:all .15s ease;cursor:pointer;
+}
+.dropdown-item:hover{background:var(--bg);color:var(--teal);}
 .msg{font-size:13px;color:var(--teal-dark);margin-top:-6px;margin-bottom:10px;}
 .reminder-btn{white-space:nowrap;}
-.profile-badge{width:58px;height:58px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin:0 auto 16px;}
-.profile-modal .detail-row{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--border);font-size:13px;}
+.profile-badge{
+  width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg, #0d9488, #2563eb);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;
+  margin:0 auto 18px;box-shadow:0 8px 20px rgba(13,148,136,0.3);
+}
+.profile-modal .detail-row{display:flex;justify-content:space-between;padding:11px 0;border-top:1px solid var(--border);font-size:13px;}
 
 @media (max-width:640px){
-  .topbar{padding:10px 12px;gap:8px;}
-  .search-box{min-width:0;padding:7px 9px;}
+  .topbar{padding:10px 14px;gap:8px;}
+  .search-box{min-width:0;padding:7px 10px;}
   .search-box input{font-size:12px;}
   .topbar-right{gap:6px;}
   .topbar-right > .btn-outline:not(.reminder-btn){display:none;}
