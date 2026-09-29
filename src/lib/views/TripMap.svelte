@@ -1,4 +1,4 @@
-﻿<script>
+<script>
   import { trips, itineraries } from '../data.js';
   import { goBack, goTo } from '../stores.js';
   import { statusClass } from '../badge.js';
@@ -20,6 +20,12 @@
   $: pendingByTrip = Object.fromEntries($trips.map((trip) => [trip.id, (itemsByTrip[trip.id] || []).some((item) => item.status === 'Pending')]));
 
   let copiedTripId = null;
+  function openTripSummary(trip) {
+    if (typeof window !== 'undefined') {
+      window.open(`/trip-summary/${trip.id}`, '_blank');
+    }
+  }
+
   async function copyShareLink(trip) {
     const url = `${window.location.origin}/trip-summary/${trip.id}`;
     try {
@@ -74,11 +80,30 @@
   <div class="trip-grid">
     {#each $trips as trip}
       <article class="card trip-route">
-        <div class="route-head"><div><h2>{trip.name}</h2>{#if pendingByTrip[trip.id]}<span class="badge badge-amber">⏳ Pending</span>{:else}<span class="badge {statusClass(trip.status)}">{trip.status}</span>{/if}</div><div class="route-head-actions"><button class="btn btn-outline" on:click={() => copyShareLink(trip)}>{copiedTripId === trip.id ? '✓ Copied' : '🔗 Copy'}</button><a class="btn btn-outline" href={routeUrl(trip)} target="_blank" rel="noreferrer">Open map ↗</a></div></div>
+        <div class="route-head">
+          <div>
+            <button type="button" class="trip-name-btn" on:click={() => openTripSummary(trip)} title="Open Trip Summary">
+              <h2>{trip.name} ↗</h2>
+            </button>
+            {#if pendingByTrip[trip.id]}<span class="badge badge-amber">⏳ Pending</span>{:else}<span class="badge {statusClass(trip.status)}">{trip.status}</span>{/if}
+          </div>
+          <div class="route-head-actions">
+            <button class="btn btn-outline" on:click={() => openTripSummary(trip)} title="Open Trip Summary">📄 Summary ↗</button>
+            <button class="btn btn-outline" on:click={() => copyShareLink(trip)}>{copiedTripId === trip.id ? '✓ Copied' : '🔗 Copy'}</button>
+            <a class="btn btn-outline" href={routeUrl(trip)} target="_blank" rel="noreferrer">Open map ↗</a>
+          </div>
+        </div>
         <div class="flow">
           <div class="stop"><span class="marker start">1</span><div><small>START</small><b>{trip.startDate || 'Start date not set'}</b><p>Trip departure</p></div></div>
           <div class="line"></div>
-          <div class="stop"><span class="marker destination">2</span><div><small>DESTINATION</small><b>{trip.destination || 'Destination not set'}</b><p>{trip.name}</p></div></div>
+          <button type="button" class="stop stop-clickable" on:click={() => openTripSummary(trip)} title={`Click to view ${trip.destination || trip.name} summary`}>
+            <span class="marker destination">2</span>
+            <div>
+              <small>DESTINATION · VIEW SUMMARY ↗</small>
+              <b>{trip.destination || 'Destination not set'}</b>
+              <p>{trip.name}</p>
+            </div>
+          </button>
           {#each itemsByTrip[trip.id] || [] as item, index}
             <div class="line"></div>
             <button type="button" class="stop stop-clickable" on:click={() => openStatusPicker(trip, item)}>
@@ -107,7 +132,11 @@
             </ul>
           </div>
         {/if}
-        <div class="route-actions"><button class="btn btn-outline" on:click={() => goTo('trips', { viewTripId: trip.id })}>Trip details</button><button class="btn btn-primary" on:click={() => goTo('itinerary', { tripId: trip.id })}>Manage itinerary</button></div>
+        <div class="route-actions">
+          <button class="btn btn-outline" on:click={() => openTripSummary(trip)}>📄 View Summary</button>
+          <button class="btn btn-outline" on:click={() => goTo('trips', { viewTripId: trip.id })}>Trip details</button>
+          <button class="btn btn-primary" on:click={() => goTo('itinerary', { tripId: trip.id })}>Manage itinerary</button>
+        </div>
       </article>
     {:else}<div class="card empty-state">No trips available to map yet.</div>{/each}
   </div>
@@ -136,7 +165,9 @@
 .pending-summary{margin:0 0 14px;padding:10px 12px;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;font-size:12.5px;color:#92400e;}
 .pending-summary b{display:block;margin-bottom:4px;font-size:12.5px;}
 .pending-summary ul{margin:0;padding-left:18px;}
-.pending-summary li{margin:2px 0;}
+.trip-name-btn{background:none;border:none;padding:0;font:inherit;cursor:pointer;text-align:left;display:block;}
+.trip-name-btn h2{font-size:17px;margin:0 0 7px;color:var(--text);transition:color .15s;}
+.trip-name-btn:hover h2{color:var(--teal);text-decoration:underline;}
 .route-head h2{font-size:17px;margin:0 0 7px;}
 .flow{margin:22px 0 15px;flex:1;overflow-y:auto;padding-right:4px;}
 .stop{display:flex;gap:11px;align-items:flex-start;}
