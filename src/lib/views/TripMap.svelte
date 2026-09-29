@@ -83,12 +83,11 @@
         <div class="route-head">
           <div>
             <button type="button" class="trip-name-btn" on:click={() => openTripSummary(trip)} title="Open Trip Summary">
-              <h2>{trip.name} ↗</h2>
+              <h2>{trip.name}</h2>
             </button>
             {#if pendingByTrip[trip.id]}<span class="badge badge-amber">⏳ Pending</span>{:else}<span class="badge {statusClass(trip.status)}">{trip.status}</span>{/if}
           </div>
           <div class="route-head-actions">
-            <button class="btn btn-outline" on:click={() => openTripSummary(trip)} title="Open Trip Summary">📄 Summary ↗</button>
             <button class="btn btn-outline" on:click={() => copyShareLink(trip)}>{copiedTripId === trip.id ? '✓ Copied' : '🔗 Copy'}</button>
             <a class="btn btn-outline" href={routeUrl(trip)} target="_blank" rel="noreferrer">Open map ↗</a>
           </div>
@@ -96,10 +95,10 @@
         <div class="flow">
           <div class="stop"><span class="marker start">1</span><div><small>START</small><b>{trip.startDate || 'Start date not set'}</b><p>Trip departure</p></div></div>
           <div class="line"></div>
-          <button type="button" class="stop stop-clickable" on:click={() => openTripSummary(trip)} title={`Click to view ${trip.destination || trip.name} summary`}>
+          <button type="button" class="stop stop-clickable" on:click={() => openTripSummary(trip)} title="Open Trip Summary">
             <span class="marker destination">2</span>
             <div>
-              <small>DESTINATION · VIEW SUMMARY ↗</small>
+              <small>DESTINATION</small>
               <b>{trip.destination || 'Destination not set'}</b>
               <p>{trip.name}</p>
             </div>
@@ -133,7 +132,6 @@
           </div>
         {/if}
         <div class="route-actions">
-          <button class="btn btn-outline" on:click={() => openTripSummary(trip)}>📄 View Summary</button>
           <button class="btn btn-outline" on:click={() => goTo('trips', { viewTripId: trip.id })}>Trip details</button>
           <button class="btn btn-primary" on:click={() => goTo('itinerary', { tripId: trip.id })}>Manage itinerary</button>
         </div>
